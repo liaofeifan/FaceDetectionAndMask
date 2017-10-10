@@ -1,14 +1,8 @@
 import numpy as np
 import cv2
 
-root_path = "/usr/local/Cellar/opencv/3.3.0_3/share/OpenCV/haarcascades/"
-
-face_cascade_path = root_path + "haarcascade_frontalface_default.xml"
-eye_cascade_path = root_path + "haarcascade_eye.xml"
-
-
-face_cascade = cv2.CascadeClassifier(face_cascade_path)
-eye_cascade = cv2.CascadeClassifier(eye_cascade_path)
+face_cascade = cv2.CascadeClassifier('/opt/opencv3/data/haarcascades/haarcascade_frontalface_default.xml')
+eye_cascade = cv2.CascadeClassifier('/opt/opencv3/data/haarcascades_cuda/haarcascade_eye.xml')
 
 img = cv2.imread('nba.jpg')
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
