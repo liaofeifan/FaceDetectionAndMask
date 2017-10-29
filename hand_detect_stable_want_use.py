@@ -17,25 +17,6 @@ def run_avg(image, aWeight):
     cv2.accumulateWeighted(image, bg, aWeight)
 
 
-# To segment the region of hand in the image
-def segment(image, threshold = 25 ):
-    global bg
-    # find the absolute difference between background and current frame
-    diff = cv2.absdiff(bg.astype("uint8"),image)
-
-    # threshold the diff image so that we get the foreground
-    thresholded = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)[1]
-
-    # get the contours in the threshold image
-    (_, cnts, _) = cv2. findContours(thresholded.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # return None, if no contours detected
-    if len(cnts) == 0:
-        return
-    else:
-        # based on contour area, get the maximum contour which is the hand
-        segmented = max(cnts, key = cv2.contourArea)
-        return (thresholded, segmented)
 
 
 
@@ -44,13 +25,15 @@ from sklearn.metrics import pairwise
 def count(thresholded, segmented):
     # find the convex hull of the segmented hand region
     chull = cv2.convexHull(segmented)
-    print len(chull)
+    print "chull = ", len(chull)
 
     # find the most extreme points in the convex hull
     extreme_top = tuple(chull[chull[:, :, 1].argmin()][0])
     extreme_bottom = tuple(chull[chull[:, :, 1].argmax()][0])
     extreme_left = tuple(chull[chull[:, :, 0].argmin()][0])
     extreme_right = tuple(chull[chull[:, :, 0].argmax()][0])
+
+    print "top = ", extreme_top
 
     # find the center of the palm
     cX = (extreme_left[0] + extreme_right[0]) / 2
@@ -96,18 +79,6 @@ def count(thresholded, segmented):
 
     return count
 
-
-#blur
-def blur_method(grey):
-
-    blurred = cv2.GaussianBlur(grey, (35,35),0)
-
-    threshold_value = cv2.threshold(blurred, 127, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)[1]
-
-    _, contours, hierarchy = cv2.findContours(threshold_value, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-
-    segmented = max(contours, key=cv2.contourArea)
-    return (threshold_value, segmented)
 
 
 def hsv_method(frame):
