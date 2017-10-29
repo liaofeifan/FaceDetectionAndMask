@@ -20,24 +20,24 @@ noseCascade = cv2.CascadeClassifier(noseCascadeFilePath)
 #-----------------------------------------------------------------------------
 
 # Load our overlay image: mustache.png
-imgMustache = cv2.imread('res/ironman.png',-1)
+imgDecoration = cv2.imread('res/test_superman.png',-1)
 
 # Create the mask for the mustache
-orig_mask = imgMustache[:,:,3]
+orig_mask = imgDecoration[:,:,3]
 
 # Create the inverted mask for the mustache
 # orig_mask_inv = cv2.bitwise_not(orig_mask)
-orig_mask_inv = orig_mask
+orig_mask_inv = cv2.bitwise_not(orig_mask)
 # Convert mustache image to BGR
 # and save the original image size (used later when re-sizing the image)
-imgMustache = imgMustache[:,:,0:3]
-origMustacheHeight, origMustacheWidth = imgMustache.shape[:2]
+imgDecoration = imgDecoration[:,:,0:3]
+origDecorationHeight, origDecorationWidth = imgDecoration.shape[:2]
 #-----------------------------------------------------------------------------
 #       Main program loop
 #-----------------------------------------------------------------------------
 
 # collect video input from first webcam on system
-video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(1)
 
 while True:
     # Capture video feed
@@ -60,9 +60,15 @@ while True:
     for (x, y, w, h) in faces:
         # Un-comment the next line for debug (draw box around all faces)
         # face = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+        x1 = x
+        y1 = y
+        x2 = x + w
+        y2 = y + h
+        faceWidth = w
+        faceHeight = h
 
-        roi_gray = gray[y:y+h, x:x+w]
-        roi_color = frame[y:y+h, x:x+w]
+        roi_gray = gray[y1:y2, x1:x2]
+        roi_color = frame[y1:y2, x1:x2]
 
         # Detect a nose within the region bounded by each face (the ROI)
         nose = noseCascade.detectMultiScale(roi_gray)
@@ -72,14 +78,14 @@ while True:
             #cv2.rectangle(roi_color,(nx,ny),(nx+nw,ny+nh),(255,0,0),2)
 
             # The mustache should be three times the width of the nose
-            mustacheWidth =  3 * nw
-            mustacheHeight = mustacheWidth * origMustacheHeight / origMustacheWidth
+            DecorationWidth =  int(round(5 * faceWidth))
+            DecorationHeight = DecorationWidth * origDecorationHeight / origDecorationWidth
 
             # Center the mustache on the bottom of the nose
-            x1 = nx - (mustacheWidth/4)
-            x2 = nx + nw + (mustacheWidth/4)
-            y1 = ny + nh - (mustacheHeight/2)
-            y2 = ny + nh + (mustacheHeight/2)
+            x1 = nx - (DecorationWidth/3)
+            x2 = nx + nw + (DecorationWidth/3)
+            y1 = ny + nh - (DecorationHeight/2)
+            y2 = ny + nh + (DecorationHeight/2)
 
             # Check for clipping
             if x1 < 0:
@@ -92,14 +98,14 @@ while True:
                 y2 = h
 
             # Re-calculate the width and height of the mustache image
-            mustacheWidth = x2 - x1
-            mustacheHeight = y2 - y1
+            DecorationWidth = x2 - x1
+            DecorationHeight = y2 - y1
 
             # Re-size the original image and the masks to the mustache sizes
             # calcualted above
-            mustache = cv2.resize(imgMustache, (mustacheWidth,mustacheHeight), interpolation = cv2.INTER_AREA)
-            mask = cv2.resize(orig_mask, (mustacheWidth,mustacheHeight), interpolation = cv2.INTER_AREA)
-            mask_inv = cv2.resize(orig_mask_inv, (mustacheWidth,mustacheHeight), interpolation = cv2.INTER_AREA)
+            mustache = cv2.resize(imgDecoration, (DecorationWidth,DecorationHeight), interpolation = cv2.INTER_AREA)
+            mask = cv2.resize(orig_mask, (DecorationWidth,DecorationHeight), interpolation = cv2.INTER_AREA)
+            mask_inv = cv2.resize(orig_mask_inv, (DecorationWidth,DecorationHeight), interpolation = cv2.INTER_AREA)
 
             # take ROI for mustache from background equal to size of mustache image
             roi = roi_color[y1:y2, x1:x2]

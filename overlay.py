@@ -1,8 +1,8 @@
 import cv2
 
 # Load two images
-img1 = cv2.imread('maxresdefault.jpg')
-img2 = cv2.imread('glasses13.png',-1)
+img1 = cv2.imread('res/maxresdefault.jpg')
+img2 = cv2.imread('res/ironman.png',-1)
 # I want to put logo on top-left corner, So I create a ROI
 rows,cols,channels = img2.shape
 roi = img1[0:rows, 0:cols ]
