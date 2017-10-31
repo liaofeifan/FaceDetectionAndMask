@@ -95,7 +95,7 @@ def count(thresholded, segmented):
         if ((cY + (cY * 0.25)) > (y + h)) and ((circumference * 0.25) > c.shape[0]):
             count += 1
 
-    return count
+    return count, extreme_top
 
 
 
@@ -158,11 +158,11 @@ if __name__ == "__main__":
                 #cv2.imshow("Thresholded", thresholded)
 
                 # count the number of fingers
-                fingers = count(thresholded, segmented)
+                fingers, e_top = count(thresholded, segmented)
 
                 cv2.putText(clone, str(fingers), (70, 45), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-
+                cv2.circle(clone, e_top, 8, (0, 0, 255), -1)
 
 
         # draw the segmented hand

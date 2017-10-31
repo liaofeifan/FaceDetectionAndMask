@@ -2,7 +2,8 @@ import cv2
 import imutils
 import numpy as np
 
-#--------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
 # load Classifiers
 def load_Classifiers():
     baseCascadePath = "./model/"
@@ -16,26 +17,9 @@ def load_Classifiers():
     return (faceCascade, noseCascade)
 
 
-#--------------------------------------------------------------------------
-# Load our overlay image and compact the paramatars
-def load_masks(name):
-    imgDecoration = cv2.imread(name, -1)
-
-    # Create the mask for the mustache
-    orig_mask = imgDecoration[:, :, 3]
-
-    # Create the inverted mask for the mustache
-    orig_mask_inv = cv2.bitwise_not(orig_mask)
-
-    # Convert mustache image to BGR
-    # and save the original image size (used later when re-sizing the image)
-    imgDecoration = imgDecoration[:, :, 0:3]
-    origDecorationHeight, origDecorationWidth = imgDecoration.shape[:2]
-
-    return (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth)
 
 
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # get fingers extreme points
 def get_extreme_points(segmented):
     chull = cv2.convexHull(segmented)
@@ -54,27 +38,11 @@ def get_extreme_points(segmented):
     return extreme_top, extreme_bottom, extreme_left, extreme_right
 
 
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # calculate the distance between (x1, y1) and (x2, y2)
 def cal_dis(x1, y1, x2, y2):
-    return np.sqrt( np.power(x1 - x2, 2) + np.power(y1 - y2, 2) )
+    return np.sqrt(np.power(x1 - x2, 2) + np.power(y1 - y2, 2))
 
-
-# --------------------------------------------------------------------------
-# To segment the region of hand in the image with blur method
-# https://digibee.co.in/2017/05/24/gesture-recognition-using-open-cv-and-python/
-# Here 127 is the threshold value.The white area have a pixel value less than 127
-# and the black portion have a pixel value greater than 127.
-# we update change this value according to the light and background condition
-def segment_blur(grey_image, thr = 127):
-    blurred = cv2.GaussianBlur(grey_image, (35,35),0)
-
-    threshold_value = cv2.threshold(blurred, thr, 255, cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)[1]
-
-    _, contours, hierarchy = cv2.findContours(threshold_value, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-
-    segmented = max(contours, key=cv2.contourArea)
-    return (threshold_value, segmented)
 
 
 
@@ -162,18 +130,17 @@ def segment_hsv(frame):
     return (thresh, segmented)
 
 
-
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # resize the nask to DecorationWidth and DecorationHeight
-def resize_mask(imgDecoration, orig_mask, orig_mask_inv,  DecorationWidth,DecorationHeight):
+def resize_mask(imgDecoration, orig_mask, orig_mask_inv, DecorationWidth, DecorationHeight):
     resized_imgDecoration = cv2.resize(imgDecoration, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
     resized_mask = cv2.resize(orig_mask, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
     resized_mask_inv = cv2.resize(orig_mask_inv, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
 
     return (resized_imgDecoration, resized_mask, resized_mask_inv)
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # get the joined image(ROI), p.s. the imgDecoration, mask and mask_inv here should be resized if necessary
 # add mask to according coordinate
 def add_mask_to_ROI(imgDecoration, mask, mask_inv, roi_color):
@@ -206,14 +173,13 @@ def add_mask_to_ROI(imgDecoration, mask, mask_inv, roi_color):
     # join the roi_bg and roi_fg
     dst = cv2.add(roi_bg, roi_fg)
 
-
     return dst
 
 
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # detect face and add mask to the face
-def add_mask_to_face(gray, faceCascade, noseCascade, imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth):
+def add_mask_to_face(gray, faceCascade, noseCascade, imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight,
+                     origDecorationWidth):
     # Detect faces in input video stream
     faces = faceCascade.detectMultiScale(
         gray,
@@ -294,7 +260,7 @@ def add_mask_to_face(gray, faceCascade, noseCascade, imgDecoration, orig_mask, o
     return frame, top, bottom, left, right
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # dihibition_mask
 def exhibit_mask(frame, mask_dictionary):
     # get the frame height and width
@@ -307,14 +273,14 @@ def exhibit_mask(frame, mask_dictionary):
     for mask_name, mask_status in mask_dictionary.iteritems():
 
         if (mask_status == 1):
-
             # -----load and display mask ---
             # load masks
             (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks(
                 mask_name)
 
             # draw the exhibition area for the masks
-            top, bottom, left, right = int(0.4 * frame_height) * count, int( (0.3 + count * 0.3) * frame_height), 0, int(0.2 * frame_width)
+            top, bottom, left, right = int(0.4 * frame_height) * count, int((0.3 + count * 0.3) * frame_height), 0, int(
+                0.2 * frame_width)
 
             # resize the mask1
             DecorationWidth = right - left
@@ -328,16 +294,12 @@ def exhibit_mask(frame, mask_dictionary):
             dst = add_mask_to_ROI(resized_imgDecoration, resized_mask, resized_mask_inv, roi_color)
             frame[top:bottom, left:right] = dst
 
-
             count += 1
-
-
-
 
     return frame
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # finger detection and counting
 def finger_detect(frame, top, right, bottom, left):
     # resize the frame
@@ -382,23 +344,16 @@ def finger_detect(frame, top, right, bottom, left):
     return frame, extreme_top
 
 
-
-
 if __name__ == "__main__":
-    #-----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
     # collect video input from first webcam on system
     video_capture = cv2.VideoCapture(0)
 
-    video_capture.set(3,320)
-    video_capture.set(4,240)
-
-
+    video_capture.set(3, 320)
+    video_capture.set(4, 240)
 
     print video_capture.get(3)
 
-
-    # ROI coordinateds
-    finger_detect_rec_top, finger_detect_rec_right, finger_detect_rec_bottom, finger_detect_rec_left = 10, 350, 225, 590
 
     # the coordinate of detect face
     face_top, face_bottom, face_left, face_right = 0, 0, 0, 0
@@ -407,12 +362,11 @@ if __name__ == "__main__":
     # status 1 : display
     # status 2 : drag
     # status 3 : add on face
-    mask_dict = {"res/ironman.png" : 1, "res/mustache.png" : 1}
+    mask_dict = {"res/ironman.png": 1, "res/mustache.png": 1}
 
     while True:
 
-
-        #--------------------phase 0: read the frame and gray scale frame--------------------------------
+        # --------------------phase 0: read the frame and gray scale frame--------------------------------
         # Capture video feed
         ret, frame = video_capture.read()
 
@@ -422,26 +376,15 @@ if __name__ == "__main__":
         # --------------------phase 1: display all the masks at the left side of the frame----------------
         frame = exhibit_mask(frame, mask_dict)
 
-        # --------------------phase 2: add mask to face-------------------
+
         # load face and nose Classifiers
         (faceCascade, noseCascade) = load_Classifiers()
 
-        # load masks
-        (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks("res/ironman.png")
-
-        # add mask to face
-        frame, face_top, face_bottom, face_left, face_right = add_mask_to_face(gray, faceCascade, noseCascade, imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth)
-
-        # ---------------------phase 3: finger detection-------------------------
-        frame, extreme_top = finger_detect(frame,finger_detect_rec_top, finger_detect_rec_right, finger_detect_rec_bottom, finger_detect_rec_left)
-
-        # ---------------------phase 4: hook the finger and the mask-------------
 
 
 
-        # ---------------------phase 5: drag the mask to face--------------------
-        # ---------------------phase 6: overlay mask to face---------------------
-        # Display the resulting frame
+
+
 
         cv2.imshow('Video', frame)
 

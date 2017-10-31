@@ -2,173 +2,256 @@ import cv2
 import imutils
 import numpy as np
 
-# global variables
-bg = None
-
-# To find the running average over the backgound
-def run_avg(image, aWeight):
-    global bg
-    # initialize the backgound
-    if bg is None:
-        bg = image.copy().astype("float")
-        return
-
-    # compute weighted average, accmulate it and update the background
-    cv2.accumulateWeighted(image, bg, aWeight)
+global test
 
 
-# To segment the region of hand in the image
-def segment(image, threshold = 20):
-    global bg
-    # find the absolute difference between background and current frame
-    diff = cv2.absdiff(bg.astype("uint8"),image)
-
-    # threshold the diff image so that we get the foreground
-    thresholded = cv2.threshold(diff, threshold, 255, cv2.THRESH_BINARY)[1]
-
-    # get the contours in the threshold image
-    (_, cnts, _) = cv2. findContours(thresholded.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # return None, if no contours detected
-    if len(cnts) == 0:
-        return
-    else:
-        # based on contour area, get the maximum contour which is the hand
-        segmented = max(cnts, key = cv2.contourArea)
-        return (thresholded, segmented)
+def cal_dis(x1, y1, x2, y2):
+    return np.sqrt( np.power(x1 - x2, 2) + np.power(y1 - y2, 2) )
 
 
-
-# hand finger counting
-from sklearn.metrics import pairwise
-def count(thresholded, segmented):
-    # find the convex hull of the segmented hand region
+# get fingers extreme points
+def get_extreme_points(thresholded, segmented):
     chull = cv2.convexHull(segmented)
 
+    # chull = segmented
+
+    # print chull
     # find the most extreme points in the convex hull
     extreme_top = tuple(chull[chull[:, :, 1].argmin()][0])
     extreme_bottom = tuple(chull[chull[:, :, 1].argmax()][0])
     extreme_left = tuple(chull[chull[:, :, 0].argmin()][0])
     extreme_right = tuple(chull[chull[:, :, 0].argmax()][0])
-    print extreme_top
 
-    # find the center of the palm
-    cX = (extreme_left[0] + extreme_right[0]) / 2
-    cY = (extreme_top[1] + extreme_bottom[1]) / 2
+    # print extreme_top
 
-    # find the maximum eucidean distance between the center of the palm
-    # and the most extreme pints of the convex hull
-    distance = pairwise.euclidean_distances([(cX, cY)], Y = [extreme_left, extreme_right, extreme_top, extreme_bottom])[0]
-    maximum_distance = distance[distance.argmax()]
-
-    # calculate the radius of the circle with 80% ot the max eucidean
-    radius = int(0.8 * maximum_distance)
-
-    # find the circumference of the circle
-    circumference = (2 * np.pi * radius)
-
-    # take out the circular ROI which has the palm and the fingers
-    circular_roi = np.zeros(thresholded.shape[:2], dtype="uint8")
-
-    #draw the circular ROI
-    cv2.circle(circular_roi, (cX, cY), radius, 255, 1)
-
-    # take bit-wise AND between thresholed hand using the circular ROI
-    # whcih gives the cuts obtained using mask on the thresholded hand
-    circular_roi = cv2.bitwise_and(thresholded, thresholded, mask=circular_roi)
-
-    # compute the contours in the circular ROI
-    (_, cnts, _) = cv2.findContours(circular_roi.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-    # initialize the the finger count
-    count = 0
-
-    # loop through the contours found
-    for c in cnts:
-        # compute the bounding box of the contour
-        (x, y, w, h) = cv2.boundingRect(c)
-
-        # increment the count of fingers only if
-        # 1. the contour region is not the wrist (bottom area)
-        # 2. the number of points along the contour does not exceed 25% of the circumference of the circular ROI
-        if ((cY + (cY * 0.25)) > (y + h)) and ((circumference * 0.25) > c.shape[0]):
-            count += 1
-
-    return count
+    return extreme_top, extreme_bottom, extreme_left, extreme_right
 
 
+def hsv_method(frame):
+    # Convert to HSV color space
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+
+    # Create a binary image with where white will be skin colors and rest is black
+    mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+
+
+    # ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
+    #
+    # mask2 = cv2.inRange(ycrcb, np.array([54, 131, 110]), np.array([163, 157, 135]))
+
+    # Kernel matrices for morphological transformation
+    kernel_square = np.ones((11, 11), np.uint8)
+    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+
+    # Perform morphological transformations to filter out the background noise
+    # Dilation increase skin color area
+    # Erosion increase skin color area
+    dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
+    erosion = cv2.erode(dilation, kernel_square, iterations=1)
+    dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
+    filtered = cv2.medianBlur(dilation2, 5)
+    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
+    dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
+    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
+    # ??????
+    median = cv2.medianBlur(dilation2, 5)
+
+    thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
+
+
+    # Find contours of the filtered frame
+    _, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if len(contours) == 0:
+        return
+    else:
+        segmented = max(contours, key=cv2.contourArea)
+        return (thresh, segmented)
+
+
+# --------------------------------------------------------------------------
+# Load our overlay image and compact the paramatars
+def load_masks(name):
+    imgDecoration = cv2.imread(name, -1)
+
+    # Create the mask for the mustache
+    orig_mask = imgDecoration[:, :, 3]
+
+    # Create the inverted mask for the mustache
+    orig_mask_inv = cv2.bitwise_not(orig_mask)
+
+    # Convert mustache image to BGR
+    # and save the original image size (used later when re-sizing the image)
+    imgDecoration = imgDecoration[:, :, 0:3]
+    origDecorationHeight, origDecorationWidth = imgDecoration.shape[:2]
+
+    return (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth)
+
+def add_mask_to_ROI(imgDecoration, mask, mask_inv, roi_color):
+    # (top,left)----------------------------(top,right)
+    # (y1,x1)                                   (y1,x2)
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # -                                         -
+    # (y2,x1)                                   (y2,x2)
+    # (bottom,left)--------------------------(bottom,right)
+    # take ROI for mustache from background equal to size of mustache image
+    # roi = roi_color[top:bottom, left:right]
+    roi = roi_color
+    # roi_bg contains the original image only
+    #  where the mustache is not
+    # in the region that is the size of the mustache.
+    roi_bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
+
+    # roi_fg contains the image of the mustache only where the mustache is
+    roi_fg = cv2.bitwise_and(imgDecoration, imgDecoration, mask=mask)
+
+    # join the roi_bg and roi_fg
+    dst = cv2.add(roi_bg, roi_fg)
+
+
+    return dst
+
+def resize_mask(imgDecoration, orig_mask, orig_mask_inv,  DecorationWidth,DecorationHeight):
+    resized_imgDecoration = cv2.resize(imgDecoration, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
+    resized_mask = cv2.resize(orig_mask, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
+    resized_mask_inv = cv2.resize(orig_mask_inv, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
+
+    return (resized_imgDecoration, resized_mask, resized_mask_inv)
+
+def drag_mask(frame, extreme_top,imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth):
+    # get the frame height and width
+    (frame_height, frame_width) = frame.shape[:2]
+    # draw the exhibition area for the masks
+    top, bottom, left, right = 0, int(0.3 * frame_height), 0, int(0.2 * frame_width)
+
+    # resize the mask1
+    DecorationWidth = right - left
+    DecorationHeight = bottom - top
+
+    pic_exh_center = ( (left + right) / 2, (top + bottom) / 2 )
+
+    (resized_imgDecoration, resized_mask, resized_mask_inv) = resize_mask(imgDecoration, orig_mask, orig_mask_inv,
+                                                                          DecorationWidth, DecorationHeight)
+
+    # print DecorationHeight, DecorationWidth
+
+    top_mask, bottom_mask, left_mask, right_mask = extreme_top[1] - (DecorationHeight) / 2, extreme_top[1] + (DecorationHeight) / 2 + 1, extreme_top[0] - (DecorationWidth) / 2, extreme_top[0] + (DecorationWidth) / 2
+
+    # print top_mask
+    # print bottom_mask
+    # print left_mask
+    # print right_mask
+
+    if top_mask < 0 or bottom_mask > frame_height or left_mask < 0 or right_mask > frame_width:
+        return frame
+
+    dis_to_pic = cal_dis(extreme_top[0], extreme_top[1], pic_exh_center[0], pic_exh_center[1])
+
+    print dis_to_pic
+
+    if dis_to_pic < 30:
+        roi_mask = frame[top_mask:bottom_mask, left_mask:right_mask]
+
+        # roi_mask = frame[top:bottom, left:right]
+
+        dst = add_mask_to_ROI(resized_imgDecoration, resized_mask, resized_mask_inv, roi_mask)
+        frame[top_mask:bottom_mask, left_mask:right_mask] = dst
+
+    else:
+        roi_mask = frame[top:bottom, left:right]
+
+        dst = add_mask_to_ROI(resized_imgDecoration, resized_mask, resized_mask_inv, roi_mask)
+        frame[top:bottom, left:right] = dst
+
+    return frame
 
 
 # main function
 if __name__ == "__main__":
-    # initialize weight
-    aWeight = 0.5
 
     # get the reference to the webcame
     camera = cv2.VideoCapture(0)
 
-    # ROI coordinateds
     top, right, bottom, left = 10, 350, 225, 590
-
-    # initialize num of frames
-    num_frames = 0
 
     # keep looping, until interrupted
 
-    while(True):
+    while (True):
         # get the current frame
         (grabbed, frame) = camera.read()
 
         # resize the frame
         frame = imutils.resize(frame, width=700)
 
-        #flip the frame so that it is not the mirror view ????????????
-        frame = cv2.flip(frame,1)
+        # flip the frame so that it is not the mirror view ????????????
+        frame = cv2.flip(frame, 1)
 
-        #clone the crmae*******
+        # clone the crmae*******
         clone = frame.copy()
+
+        # get the ROI
+        roi = frame[top:bottom, right:left]
+
 
         # get the height and width of the frame
         (height, width) = frame.shape[:2]
 
         # get the ROI
-        roi = frame[top:bottom, right:left]
         # roi = frame[top:bottom, left:right]
 
-        #convert the roi to grayscale and blur it
-        gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (7,7), 0)
+        # convert the roi to grayscale and blur it
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (7, 7), 0)
 
         # to get the background, keep looking till a threshold is read
-        #so that our running average models gets calibrated
-        if num_frames < 30:
-            run_avg(gray, aWeight)
-        else:
-            # segment the hand region
-            hand = segment(gray)
+        # so that our running average models gets calibrated
 
-            # check whether hand region is segmented
-            if hand is not None:
-                # if yes, up[ack the threshold image and segmented region
-                (thresholded, segmented) = hand
-
-                # draw the semgent retion nd display the frame****
-                cv2.drawContours(clone, [segmented + (right, top)], -1, (0,0,255))
-                #cv2.imshow("Thresholded", thresholded)
-
-                # count the number of fingers
-                fingers = count(thresholded, segmented)
-
-                cv2.putText(clone, str(fingers), (70, 45), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        # load mask
+        (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks("res/ironman.png")
 
 
 
 
-        # draw the segmented hand
-        cv2.rectangle(clone, (left, top), (right, bottom), (0,255,0))
 
-        # increment the number of frames
-        num_frames += 1
+        # segment the hand region
+        hand = hsv_method(frame)
+
+        # check whether hand region is segmented
+        if hand is not None:
+            # if yes, up[ack the threshold image and segmented region
+            (thresholded, segmented) = hand
+
+
+
+            cv2.drawContours(clone, segmented, -1, (0, 0, 255), 3)
+
+            # cv2.imshow("Thresholded", thresholded)
+
+            # count the number of fingers
+            extreme_top, extreme_bottom, extreme_left, extreme_right = get_extreme_points(thresholded, segmented)
+            #
+            #
+
+            clone = drag_mask(clone, extreme_top,imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth)
+
+            #
+            #
+            cv2.circle(clone, extreme_top, 8, (0, 0, 255), -1)
+            # cv2.circle(clone, extreme_bottom, 8, (0, 0, 255), -1)
+            # cv2.circle(clone, extreme_left, 8, (0, 0, 255), -1)
+            # cv2.circle(clone, extreme_right, 8, (0, 0, 255), -1)
 
         # display the frame with segmented hand
         cv2.imshow("Video Feed", clone)
@@ -177,9 +260,6 @@ if __name__ == "__main__":
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-
     camera.release()
     cv2.destroyAllWindows()
-# reference
-# https://gogul09.github.io/software/hand-gesture-recognition-p1
-# https://gogul09.github.io/software/hand-gesture-recognition-p2
+
