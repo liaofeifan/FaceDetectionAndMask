@@ -51,6 +51,8 @@ def count(thresholded, segmented):
     extreme_left = tuple(chull[chull[:, :, 0].argmin()][0])
     extreme_right = tuple(chull[chull[:, :, 0].argmax()][0])
 
+    print extreme_top
+
     # find the center of the palm
     cX = (extreme_left[0] + extreme_right[0]) / 2
     cY = (extreme_top[1] + extreme_bottom[1]) / 2

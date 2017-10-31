@@ -98,6 +98,9 @@ while(1):
     #Find convex defects
     hull2 = cv2.convexHull(cnts,returnPoints = False)
     defects = cv2.convexityDefects(cnts,hull2)
+
+    print defects
+    print type(defects)
     
     #Get defect points and draw them in the original image
     FarDefect = []
