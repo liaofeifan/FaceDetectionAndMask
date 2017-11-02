@@ -17,7 +17,7 @@ noseCascade = cv2.CascadeClassifier(noseCascadeFilePath)
 #-----------------------------------------------------------------------------
 
 # Load our overlay image: mustache.png
-imgDecoration = cv2.imread('res/mustache.png',-1)
+imgDecoration = cv2.imread('res/ironman.png',-1)
 
 # Create the mask for the mustache
 orig_mask = imgDecoration[:,:,3]
@@ -29,6 +29,7 @@ orig_mask_inv = cv2.bitwise_not(orig_mask)
 # and save the original image size (used later when re-sizing the image)
 imgDecoration = imgDecoration[:,:,0:3]
 origDecorationHeight, origDecorationWidth = imgDecoration.shape[:2]
+print origDecorationHeight, origDecorationWidth
 #-----------------------------------------------------------------------------
 #       Main program loop
 #-----------------------------------------------------------------------------
@@ -65,6 +66,9 @@ while True:
         y2 = y + h
         faceWidth = w
         faceHeight = h
+        print "face area", faceWidth, faceHeight
+
+        face_top, face_bottom, face_left, face_right = y1, y2, x1, x2
 
         roi_gray = gray[y1:y2, x1:x2]
         roi_color = frame[y1:y2, x1:x2]
@@ -78,8 +82,8 @@ while True:
 
             # The mustache should be three times the width of the nose
             DecorationWidth =  int(round(5 * faceWidth))
-            DecorationHeight =  int(DecorationWidth * origDecorationHeight / origDecorationWidth )
-            print "1", DecorationWidth, DecorationHeight
+            DecorationHeight = DecorationWidth * origDecorationHeight / origDecorationWidth
+
 
             # Center the mustache on the bottom of the nose
             x1 = nx - (DecorationWidth/3)
@@ -99,9 +103,8 @@ while True:
 
             # Re-calculate the width and height of the mustache image
             DecorationWidth = x2 - x1
-            DecorationHeight = int((y2 - y1) )
-
-            print "2", DecorationWidth, DecorationHeight
+            DecorationHeight = y2 - y1 + 1
+            print "Decorate area", DecorationWidth, DecorationHeight
 
             # Re-size the original image and the masks to the mustache sizes
             # calcualted above

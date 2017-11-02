@@ -112,11 +112,11 @@ def test_method(frame):
     #
     #
     # # Create a binary image with where white will be skin colors and rest is black
-    # mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+    # mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
 
-    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
-
-    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
+    # ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+    #
+    # mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
     return mask2
 
@@ -188,7 +188,8 @@ if __name__ == "__main__":
 
 
         # display the frame with segmented hand
-        cv2.imshow("Video Feed", clone)
+        # cv2.imshow("Video Feed", clone)
+        cv2.imshow("Video Feed", test_method(frame))
 
         # break by pressing the "q"
         if cv2.waitKey(1) & 0xFF == ord('q'):

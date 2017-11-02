@@ -92,7 +92,7 @@ def segment_hsv(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+    mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
 
     # ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
     #

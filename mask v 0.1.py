@@ -48,17 +48,17 @@ def initialize_mask_info(mask_load_info):
 
 # --------------------------------------------------------------------------
 # initialize the coordinate of masks
-def initialize_mask_dict(mask_dictionary, frame_height, frame_width):
+def initialize_mask_dict(mask_coordinate, frame_height, frame_width):
     count = 0
-    for mask_name, mask_status in mask_dictionary.iteritems():
+    for mask_name, mask_status in mask_coordinate.iteritems():
         # draw the exhibition area for the masks
         top, bottom, left, right = int(0.4 * frame_height) * count, int((0.3 + count * 0.3) * frame_height), 0, int(
             0.2 * frame_width)
 
-        mask_status[1] = top
-        mask_status[2] = bottom
-        mask_status[3] = left
-        mask_status[4] = right
+        mask_status[0] = top
+        mask_status[1] = bottom
+        mask_status[2] = left
+        mask_status[3] = right
 
         count += 1
 
@@ -110,7 +110,7 @@ def segment_blur(grey_image, thr = 127):
 # --------------------------------------------------------------------------
 # use ycrcb to segment the mask and get the finger contour
 def segment_ycrcb(frame):
-    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
+    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
 
     mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
@@ -153,11 +153,9 @@ def segment_hsv(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
     # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+    mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
 
-    # ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
-    #
-    # mask2 = cv2.inRange(ycrcb, np.array([54, 131, 110]), np.array([163, 157, 135]))
+
 
     # Kernel matrices for morphological transformation
     kernel_square = np.ones((11, 11), np.uint8)
@@ -238,11 +236,57 @@ def add_mask_to_ROI(imgDecoration, mask, mask_inv, roi_color):
 
     return dst
 
+#-----------------------------------------------------------------------------
+# detect face (one face)
+def face_and_nose_detect(render, gray, faceCascade, noseCascade):
+    # Detect faces in input video stream
+    faces = faceCascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(30, 30),
+        flags=cv2.CASCADE_SCALE_IMAGE
+    )
+    # Iterate over each face found
+    (x, y, w, h) = faces[0]
+
+    # Un-comment the next line for debug (draw box around all faces)
+    # face = cv2.rectangle(frame,(x,y),(x+w,y+h),(255,0,0),2)
+    x1 = x
+    y1 = y
+    x2 = x + w
+    y2 = y + h
+    faceWidth = w
+    faceHeight = h
+
+    face_top = y1
+    face_bottom = y2
+    face_left = x1
+    face_right = x2
+
+    roi_gray = gray[y1:y2, x1:x2]
+    roi_color = render[y1:y2, x1:x2]
+
+    # draw face rect
+    cv2.rectangle(render, (left, top), (right, bottom), (0, 0, 255), 2)
+
+
+    # dect nose
+    nose = noseCascade.detectMultiScale(roi_gray)
+    (nx, ny, nw, nh) = nose[0]
+
+    nose_top = ny
+    nose_bottom = ny + nh
+    nose_left = nx
+    nose_right = nx + nw
+
+    return (face_top, face_bottom, face_left, face_right, nose_top, nose_bottom, nose_left, nose_right)
+
 
 
 #-----------------------------------------------------------------------------
-# detect face and add mask to the face
-def add_mask_to_face(render, gray, faceCascade, noseCascade, mask_dictionary, mask_load_info):
+# add mask to the face
+def add_mask_to_face(face_coor, nose_coor, mask_dictionary, mask_load_info, mask_coordinate):
     # Detect faces in input video stream
     faces = faceCascade.detectMultiScale(
         gray,
@@ -342,7 +386,7 @@ def add_mask_to_face(render, gray, faceCascade, noseCascade, mask_dictionary, ma
 
 #-----------------------------------------------------------------------------
 # dihibition_mask
-def exhibit_mask(frame, render, mask_dictionary, mask_load_info):
+def exhibit_mask(frame, render, mask_dictionary, mask_load_info, mask_coordinate):
     # get the frame height and width
     (frame_height, frame_width) = frame.shape[:2]
 
@@ -350,7 +394,8 @@ def exhibit_mask(frame, render, mask_dictionary, mask_load_info):
     # the number of masks which need to be exhibit
     mask_num = len(mask_dictionary)
 
-    count = 0
+
+
     for mask_name, mask_status in mask_dictionary.iteritems():
 
         if (mask_status[0] == 1):
@@ -365,18 +410,12 @@ def exhibit_mask(frame, render, mask_dictionary, mask_load_info):
                                                                                                    mask_load_info[mask_name][3], \
                                                                                                    mask_load_info[mask_name][4]
 
-            # # draw the exhibition area for the masks
-            # top, bottom, left, right = int(0.4 * frame_height) * count, int( (0.3 + count * 0.3) * frame_height), 0, int(0.2 * frame_width)
 
-            # mask_status[1] = top
-            # mask_status[2] = bottom
-            # mask_status[3] = left
-            # mask_status[4] = right
 
-            top = mask_status[1]
-            bottom = mask_status[2]
-            left = mask_status[3]
-            right = mask_status[4]
+            top = mask_coordinate[mask_name][0]
+            bottom = mask_coordinate[mask_name][1]
+            left = mask_coordinate[mask_name][2]
+            right = mask_coordinate[mask_name][3]
 
 
             # resize the mask1
@@ -392,7 +431,6 @@ def exhibit_mask(frame, render, mask_dictionary, mask_load_info):
             render[top:bottom, left:right] = dst
 
 
-            count += 1
 
 
     return render
@@ -435,7 +473,7 @@ def finger_detect(frame, render, top,  bottom, left, right):
     # so that our running average models gets calibrated
 
     # segment the hand region
-    hand = segment_ycrcb(frame)
+    hand = segment_hsv(frame)
 
     extreme_top = 0
 
@@ -464,25 +502,57 @@ def drag_mask(frame, render, extreme_top, mask_dictionary, mask_load_info):
     (frame_height, frame_width) = frame.shape[:2]
 
 
-    # check if already hooked
-    for mask_status in mask_dictionary.items():
-        if mask_status[0] == 2:
-            # a mask is been dragged
-            return render
-
     # no mask is been dragged
     for mask_name, mask_status in mask_dictionary.iteritems():
 
+        mask_exh_top = mask_status[1]
+        mask_exh_bottom = mask_status[2]
+        mask_exh_left = mask_status[3]
+        mask_exh_right = mask_status[4]
+
+        # resize the mask
+        DecorationWidth = mask_exh_right - mask_exh_left
+        DecorationHeight = mask_exh_bottom - mask_exh_top
+
+
+
+        if mask_status[0] == 2:
+
+
+            # laod mask info that needed to be dragged
+            (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = \
+                mask_load_info[mask_name][0], \
+                mask_load_info[mask_name][1], \
+                mask_load_info[mask_name][2], \
+                mask_load_info[mask_name][3], \
+                mask_load_info[mask_name][4]
+
+            # resize the dragging mask
+            (resized_imgDecoration, resized_mask, resized_mask_inv) = resize_mask(imgDecoration, orig_mask,
+                                                                                  orig_mask_inv,
+                                                                                  DecorationWidth, DecorationHeight)
+
+            top_mask, bottom_mask, left_mask, right_mask = extreme_top[1] - (DecorationHeight) / 2, \
+                                                           extreme_top[1] + (DecorationHeight) / 2 + 1, \
+                                                           extreme_top[0] - (DecorationWidth) / 2, \
+                                                           extreme_top[0] + (DecorationWidth) / 2
+
+            print "extreme_top", extreme_top
+            print "mask coor", top_mask, bottom_mask, left_mask, right_mask
+
+
+            if top_mask < 0 or bottom_mask > frame_height or left_mask < 0 or right_mask > frame_width:
+
+                return render
+
+            roi_mask = render[top_mask:bottom_mask, left_mask:right_mask]
+            dst = add_mask_to_ROI(resized_imgDecoration, resized_mask, resized_mask_inv, roi_mask)
+            # add the mask to frame
+            render[top_mask:bottom_mask, left_mask:right_mask] = dst
+            return render
+
+
         if mask_status[0] == 1:
-
-            mask_exh_top = mask_status[1]
-            mask_exh_bottom = mask_status[2]
-            mask_exh_left = mask_status[3]
-            mask_exh_right = mask_status[4]
-
-            # resize the mask
-            DecorationWidth = mask_exh_right - mask_exh_left
-            DecorationHeight = mask_exh_bottom - mask_exh_top
 
             pic_exh_center = ( (mask_exh_left + mask_exh_right) / 2, (mask_exh_top + mask_exh_bottom) / 2 )
 
@@ -511,8 +581,12 @@ def drag_mask(frame, render, extreme_top, mask_dictionary, mask_load_info):
                                                                extreme_top[1] + (DecorationHeight) / 2 + 1, \
                                                                extreme_top[0] - (DecorationWidth) / 2, \
                                                                extreme_top[0] + (DecorationWidth) / 2
+
+
+
                 if top_mask < 0 or bottom_mask > frame_height or left_mask < 0 or right_mask > frame_width:
                     return render
+
 
                 roi_mask = render[top_mask:bottom_mask, left_mask:right_mask]
                 dst = add_mask_to_ROI(resized_imgDecoration, resized_mask, resized_mask_inv, roi_mask)
@@ -530,8 +604,8 @@ if __name__ == "__main__":
     # collect video input from first webcam on system
     video_capture = cv2.VideoCapture(0)
 
-    video_capture.set(3,640)
-    video_capture.set(4,480)
+    video_capture.set(3,320)
+    video_capture.set(4,240)
 
 
 
@@ -548,10 +622,13 @@ if __name__ == "__main__":
     # status 1 : display
     # status 2 : drag
     # status 3 : add on face
-    mask_dict = {"res/ironman.png" : [1, 0, 0, 0, 0], "res/mustache.png" : [1, 0, 0, 0, 0] }
+    mask_dict = {"res/ironman.png" : 1, "res/mustache.png" : 1 }
+
+    # mask_coor {"mask_name": [top, bottom, left, right]}
+    mask_coor = {"res/ironman.png" : [0, 0, 0, 0], "res/mustache.png" : [0, 0, 0, 0] }
 
     # initialize the coordinate of masks
-    initialize_mask_dict(mask_dict, video_capture.get(4), video_capture.get(3))
+    initialize_mask_dict(mask_coor, video_capture.get(4), video_capture.get(3))
 
     # load mask info in
     #  {"mask_name": [imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth]}
@@ -571,27 +648,28 @@ if __name__ == "__main__":
         # and use render to render image and imshow
         render = frame.copy()
 
-        print frame.shape
 
         # Create greyscale image from the video feed
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # --------------------phase 1: display all the masks at the left side of the frame----------------
-        render = exhibit_mask(frame, render, mask_dict, mask_load_info)
+        render = exhibit_mask(frame, render, mask_dict, mask_load_info, mask_coor)
 
         # --------------------phase 2: add mask to face-------------------
         # load face and nose Classifiers
         (faceCascade, noseCascade) = load_Classifiers()
 
+
+
         # add mask to face
-        render, face_top, face_bottom, face_left, face_right = add_mask_to_face(render,gray, faceCascade, noseCascade, mask_dict, mask_load_info)
+        render, face_top, face_bottom, face_left, face_right = add_mask_to_face(render,gray, faceCascade, noseCascade, mask_dict, mask_load_info, mask_coor)
 
         # ---------------------phase 3: finger detection-------------------------
         render, extreme_top = finger_detect(frame, render, face_top, face_bottom, face_left, face_right)
 
         # ---------------------phase 4: hook the finger and the mask-------------
 
-        render = drag_mask(frame, render,  extreme_top, mask_dict, mask_load_info)
+        render = drag_mask(frame, render,  extreme_top, mask_dict, mask_load_info, mask_coor)
 
         # ---------------------phase 5: drag the mask to face--------------------
         # ---------------------phase 6: overlay mask to face---------------------

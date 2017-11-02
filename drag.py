@@ -33,7 +33,7 @@ def segment(frame):
     #
     #
     # # Create a binary image with where white will be skin colors and rest is black
-    # mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+    # mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
 
     ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
 
@@ -146,7 +146,8 @@ def drag_mask(frame, extreme_top,imgDecoration, orig_mask, orig_mask_inv, origDe
 
     # print DecorationHeight, DecorationWidth
 
-    top_mask, bottom_mask, left_mask, right_mask = extreme_top[1] - (DecorationHeight) / 2, extreme_top[1] + (DecorationHeight) / 2 + 1, extreme_top[0] - (DecorationWidth) / 2, extreme_top[0] + (DecorationWidth) / 2
+    top_mask, bottom_mask, left_mask, right_mask = extreme_top[1] - (DecorationHeight) / 2, extreme_top[1] + (DecorationHeight) / 2 + 1, \
+                                                   extreme_top[0] - (DecorationWidth) / 2, extreme_top[0] + (DecorationWidth) / 2
 
     # print top_mask
     # print bottom_mask

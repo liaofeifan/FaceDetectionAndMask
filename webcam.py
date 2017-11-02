@@ -23,14 +23,13 @@ def get_extreme_points(thresholded, segmented):
 
 
 
-def hsv_method(frame):
-
+def segment_hsv(frame):
     # Convert to HSV color space
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
 
     # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+    mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
 
 
     # Kernel matrices for morphological transformation
@@ -175,7 +174,7 @@ if __name__ == "__main__":
 
         #---------------------------finger--------------
 
-        hand = segment_ycrcb(frame)
+        hand = segment_hsv(frame)
 
         # check whether hand region is segmented
         if hand is not None:
