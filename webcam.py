@@ -68,6 +68,45 @@ def hsv_method(frame):
 
 
 
+# --------------------------------------------------------------------------
+# use ycrcb to segment the mask and get the finger contour
+def segment_ycrcb(frame):
+    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
+
+    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
+
+    # Kernel matrices for morphological transformation
+    kernel_square = np.ones((11, 11), np.uint8)
+    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+
+    # Perform morphological transformations to filter out the background noise
+    # Dilation increase skin color area
+    # Erosion increase skin color area
+    dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
+    erosion = cv2.erode(dilation, kernel_square, iterations=1)
+    dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
+    filtered = cv2.medianBlur(dilation2, 5)
+    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
+    dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
+    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
+    # ??????
+    median = cv2.medianBlur(dilation2, 5)
+
+    thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
+
+
+    # Find contours of the filtered frame
+    _, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if len(contours) == 0:
+        return
+    else:
+        segmented = max(contours, key=cv2.contourArea)
+        return (thresh, segmented)
+
+
 
 if __name__ == "__main__":
 
@@ -114,6 +153,9 @@ if __name__ == "__main__":
             for ex,ey,ew,eh in eyes:
                 cv2.rectangle(roi_color,(ex,ey),(ex + ew, ey + eh),(0,255,0),2)
 
+        neck_height = 30
+        face_bottom += neck_height
+
 
 
         width = face_right - face_left
@@ -133,7 +175,7 @@ if __name__ == "__main__":
 
         #---------------------------finger--------------
 
-        hand = hsv_method(frame)
+        hand = segment_ycrcb(frame)
 
         # check whether hand region is segmented
         if hand is not None:

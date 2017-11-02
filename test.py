@@ -2,12 +2,16 @@ import cv2
 import numpy as np
 
 def change(dic):
-    dic["b"] = 1
-    return dic
+    for i,j in dic.iteritems():
+        j = "bfs"
 
 if __name__ == "__main__":
-    dic = {"b": 2, "c": 3}
+    dic = {"f": [1, ()], "c": [3, 4]}
     count = 0
+    change(dic)
+
+
+
 
 
     cap = cv2.VideoCapture(0)
@@ -17,6 +21,9 @@ if __name__ == "__main__":
 
     while True:
         ret, frame = cap.read()
+
+        print frame.shape
+
         roi_frame = frame[100:150, 100:150]
         white_mask = np.zeros((50 + 2, 50 + 2), np.uint8)
 

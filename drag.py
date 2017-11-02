@@ -27,18 +27,17 @@ def get_extreme_points(thresholded, segmented):
     return extreme_top, extreme_bottom, extreme_left, extreme_right
 
 
-def hsv_method(frame):
-    # Convert to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-
-    # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
-
-
-    # ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
+def segment(frame):
+    # # Convert to HSV color space
+    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     #
-    # mask2 = cv2.inRange(ycrcb, np.array([54, 131, 110]), np.array([163, 157, 135]))
+    #
+    # # Create a binary image with where white will be skin colors and rest is black
+    # mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+
+    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
+
+    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
     # Kernel matrices for morphological transformation
     kernel_square = np.ones((11, 11), np.uint8)
@@ -219,14 +218,14 @@ if __name__ == "__main__":
         # so that our running average models gets calibrated
 
         # load mask
-        (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks("res/ironman.png")
+        (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks("res/mustache.png" )
 
 
 
 
 
         # segment the hand region
-        hand = hsv_method(frame)
+        hand = segment(frame)
 
         # check whether hand region is segmented
         if hand is not None:

@@ -74,7 +74,7 @@ def hsv_method(frame):
 def ycrcb_method(frame):
     ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
 
-    mask2 = cv2.inRange(ycrcb, np.array([54, 131, 110]), np.array([163, 157, 135]))
+    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
     # Kernel matrices for morphological transformation
     kernel_square = np.ones((11, 11), np.uint8)
@@ -108,11 +108,15 @@ def ycrcb_method(frame):
 
 def test_method(frame):
     # Convert to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    #
+    #
+    # # Create a binary image with where white will be skin colors and rest is black
+    # mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
 
+    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
 
-    # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([2, 50, 50]), np.array([15, 255, 255]))
+    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
     return mask2
 
@@ -155,7 +159,7 @@ if __name__ == "__main__":
 
         
         # segment the hand region
-        hand = hsv_method(clone)
+        hand = ycrcb_method(clone)
 
 
 
