@@ -254,6 +254,7 @@ def resize_and_add_img_to_render(render, mask_name, mask_info, coor):
     DecorationWidth = right - left
     DecorationHeight = bottom - top
 
+    print DecorationHeight, DecorationWidth
 
     if DecorationWidth == 0 and DecorationHeight == 0:
         return render
@@ -316,23 +317,20 @@ def detect_face_and_nose(frame, render, faceCascade, noseCascade):
     # draw face rect
     cv2.rectangle(render, (face_left, face_top), (face_right, face_bottom), (0, 0, 255), 2)
 
-    nose_coor = [0, 0, 0, 0]
-
     # detect nose
-    # for not I don't need to use it
-    # nose = noseCascade.detectMultiScale(roi_gray)
-    # if len(nose) == 0:
-    #     return (face_coor, [0,0,0,0])
-    #
-    # (nx, ny, nw, nh) = nose[0]
-    #
-    # nose_top = ny
-    # nose_bottom = ny + nh
-    # nose_left = nx
-    # nose_right = nx + nw
-    #
-    #
-    # nose_coor = [nose_top, nose_bottom, nose_left, nose_right]
+    nose = noseCascade.detectMultiScale(roi_gray)
+    if len(nose) == 0:
+        return (face_coor, [0,0,0,0])
+
+    (nx, ny, nw, nh) = nose[0]
+
+    nose_top = ny
+    nose_bottom = ny + nh
+    nose_left = nx
+    nose_right = nx + nw
+
+
+    nose_coor = [nose_top, nose_bottom, nose_left, nose_right]
 
     return face_coor, nose_coor
 
@@ -415,8 +413,8 @@ def is_click(frame, render, extreme_top):
 
     cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (0, 255, 255), 2)
 
-    if extreme_top is not None:
-        if (extreme_top[0] <= click_coor[3] and extreme_top[0] >= click_coor[2]) and (extreme_top[1] >= click_coor[0] and extreme_top[1] <= click_coor[1]):
+    if extreme_top is None:
+        if (extreme_top[0] < click_coor[3] and extreme_top[0] > click_coor[2]) and (extreme_top[1] > click_coor[0] and extreme_top[1] < click_coor[1]):
             return True
 
     return False
@@ -434,8 +432,8 @@ def clear_mask_status(mask_status):
 # drag the mask
 # return render
 def drag(frame, render, extreme_top, face_coor, mask_status, mask_coors, mask_info, state_4_count):
-    CONST_STATE_4_SHADOW = 15
-    print "state_4_count", state_4_count
+    CONST_STATE_4_SHADOW = 10
+    # print "state_4_count", state_4_count
 
     # if a mask is been draged from face to exhibition
     if 4 in mask_status.values():
@@ -482,7 +480,7 @@ def drag(frame, render, extreme_top, face_coor, mask_status, mask_coors, mask_in
         if abs(r - finger_to_face) < 5:
             if state_4_count < CONST_STATE_4_SHADOW:
                 state_4_count += 1
-                print "state_4_count < CONST_STATE_4_SHADOW:", state_4_count
+                print "state_4_count", state_4_count
                 return render, state_4_count
             else:
                 if 3 in mask_status.values():
@@ -622,30 +620,29 @@ if __name__ == "__main__":
         # -----------------------------------------------------------------------------
 
         if is_click(frame, render,extreme_top):
-            print "clicked!"
+            # print "clicked!"
             cv2.circle(render, extreme_top, 8, (0, 255, 255), -1)
             clear_mask_status(mask_status)
-            display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, mask_coors, mask_info)
 
-            cv2.imshow("show",render)
-
-        else:
+            continue
 
 
-            # -----------------------------------------------------------------------------
-            # phase 5: drag masks
-            # -----------------------------------------------------------------------------
 
-            render, state_4_count = drag(frame,render,extreme_top,face_coor,mask_status,mask_coors,mask_info, state_4_count)
+        frame_height, frame_width = frame.shape[:2]
 
-            # -----------------------------------------------------------------------------
-            # phase 6: display mask according to mask state
-            # -----------------------------------------------------------------------------
+        mask_cen_to_display = [frame_width / 2, frame_width / 2]
+        drag_mask_name = "res/ironman.png"
+        mask_height, mask_width = mask_coors[drag_mask_name][1] - mask_coors[drag_mask_name][0], \
+                                  mask_coors[drag_mask_name][3] - mask_coors[drag_mask_name][2]
 
-            display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, mask_coors, mask_info)
+        mask_coor_to_display = [mask_cen_to_display[1] - mask_height / 2, mask_cen_to_display[1] + mask_height / 2,
+                                mask_cen_to_display[0] - mask_width / 2, mask_cen_to_display[0] + mask_width / 2]
 
-            # imshow the frame
-            cv2.imshow('Video', render)
+        resize_and_add_img_to_render(render,drag_mask_name,mask_info,mask_coor_to_display)
+
+
+        # imshow the frame
+        cv2.imshow('Video', render)
 
         # press any key to exit
         # NOTE;  x86 systems may need to remove: " 0xFF == ord('q')"
