@@ -6,6 +6,9 @@ import skimage.filters.rank as sfr
 
 stop_time = 100
 
+# calculate the distance between (x1, y1) and (x2, y2)
+def cal_dis(x1, y1, x2, y2):
+    return np.sqrt( np.power(x1 - x2, 2) + np.power(y1 - y2, 2) )
 
 #--------------------------------------------------------------------------
 # load Classifiers
@@ -43,17 +46,26 @@ def segment_hybird(frame):
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
 
-    mask = sfr.median(mask, disk(5))
+    # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
+    # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, disk(5))
 
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
+    erosion = cv2.erode(mask, disk(1), iterations=1)
+    dilation = cv2.dilate(erosion, disk(4), iterations=1)
+    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(15))
+
+    mask = sfr.median(mask, disk(5))
 
 
     # Find contours of the filtered frame
     _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cnt = contours[0]
-
-    hull = cv2.convexHull(cnt, returnPoints=False)
-    defects = cv2.convexityDefects(cnt, hull)
+    cnt = []
+    hull = []
+    defects = []
+    # if contours is not None:
+    #     cnt = contours[0]
+    #
+    #     hull = cv2.convexHull(cnt, returnPoints=False)
+    #     defects = cv2.convexityDefects(cnt, hull)
 
 
     if len(contours) == 0:
@@ -146,7 +158,7 @@ def detect_finger(frame, render, face_coor):
     (frame_height, frame_width) = frame.shape[:2]
 
     # flood fill the face and neck region, so we can remove face region when detect fingers
-    neck_height = 20
+    neck_height = 50
     bottom += neck_height
 
 
@@ -174,6 +186,8 @@ def detect_finger(frame, render, face_coor):
 
     extreme_top = [0,0]
 
+    segmented = []
+
     # check whether hand region is segmented
     if hand is not None:
         # if yes, up[ack the threshold image and segmented region
@@ -187,16 +201,16 @@ def detect_finger(frame, render, face_coor):
 
         cv2.circle(render, extreme_top, 8, (0, 0, 255), -1)
 
-        if defects is not None:
-            for i in range(defects.shape[0]):
-                s, e, f, d = defects[i, 0]
-                start = tuple(cnt[s][0])
-                end = tuple(cnt[e][0])
-                far = tuple(cnt[f][0])
-                cv2.line(render, start, end, [0, 255, 0], 2)
-                cv2.circle(render, far, 5, [0, 0, 255], -1)
+        # if defects is not None:
+        #     for i in range(defects.shape[0]):
+        #         s, e, f, d = defects[i, 0]
+        #         start = tuple(cnt[s][0])
+        #         end = tuple(cnt[e][0])
+        #         far = tuple(cnt[f][0])
+        #         cv2.line(render, start, end, [0, 255, 0], 2)
+        #         cv2.circle(render, far, 5, [0, 0, 255], -1)
 
-    return render, extreme_top
+    return render, extreme_top, segmented
 
 #--------------------------------------------------------------------------
 # get fingers extreme points
@@ -213,9 +227,34 @@ def get_extreme_points(segmented):
 
 
 def painting(frame, render, pts):
-    cv2.polylines(render, [np.array(pts)], False, (255, 0, 0), 1)
+    cv2.polylines(render, [np.array(pts)], False, (255, 0, 0), 4)
     return render
 
+def is_fist(frame, segmented):
+    if len(segmented) == 0:
+        return False
+    extreme_top, extreme_bottom, extreme_left, extreme_right = get_extreme_points(segmented)
+    cnt = segmented
+    hull = cv2.convexHull(cnt)
+    moments = cv2.moments(cnt)
+    if moments['m00'] != 0:
+        cx = int(moments['m10'] / moments['m00'])  # cx = M10/M00
+        cy = int(moments['m01'] / moments['m00'])  # cy = M01/M00
+
+    centr = (cx, cy)
+    radius_left = cal_dis(centr[0], centr[1], extreme_left[0], extreme_left[1])
+    radius_right = cal_dis(centr[0], centr[1], extreme_right[0], extreme_right[1])
+    radius = 0
+    if radius_left > radius_right:
+        radius = radius_right
+    else:
+        radius = radius_left
+    dis = cal_dis(centr[0], centr[1], extreme_top[0], extreme_top[1])
+    rat = dis / radius
+
+    if rat > 1.6:
+        return False
+    return True
 
 
 if __name__ == "__main__":
@@ -267,16 +306,19 @@ if __name__ == "__main__":
         # phase 3: detect fingers
         # -----------------------------------------------------------------------------
 
-        (render, extreme_top) = detect_finger(frame, render, face_coor)
+        (render, extreme_top, segmented) = detect_finger(frame, render, face_coor)
 
 
+        if is_fist(frame, segmented) is not True:
 
-        finger_print.append(extreme_top)
+            finger_print.append(extreme_top)
+
         painting(frame, render, finger_print)
 
         # imshow the frame
         cv2.imshow('Video', render)
 
+        finger_print = []
         # press any key to exit
         # NOTE;  x86 systems may need to remove: " 0xFF == ord('q')"
         if cv2.waitKey(1) & 0xFF == ord('q'):

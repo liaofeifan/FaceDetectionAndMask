@@ -65,7 +65,7 @@ def initialize_mask_dict(mask_coordinate, frame_height, frame_width):
     count = 0
     for mask_name, mask_status in mask_coordinate.iteritems():
         # draw the exhibition area for the masks
-        top, bottom, left, right = int(0.4 * frame_height) * count, int((0.3 + count * 0.3) * frame_height), 0, int(
+        top, bottom, left, right = int(0.32 * frame_height) * count, int((0.3 + count * 0.3) * frame_height), 0, int(
             0.2 * frame_width)
 
         mask_status[0] = top
@@ -208,10 +208,10 @@ def segment_hybird(frame):
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
 
-   
+
     erosion = cv2.erode(mask, disk(1), iterations=1)
     dilation = cv2.dilate(erosion, disk(4), iterations=1)
-    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(5))
+    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(15))
 
     mask = sfr.median(mask, disk(5))
 
@@ -358,7 +358,7 @@ def detect_face_and_nose(frame, render, faceCascade, noseCascade):
 
 
     # draw face rect
-    cv2.rectangle(render, (face_left, face_top), (face_right, face_bottom), (0, 0, 255), 2)
+    # cv2.rectangle(render, (face_left, face_top), (face_right, face_bottom), (0, 0, 255), 2)
 
     nose_coor = [0, 0, 0, 0]
 
@@ -395,12 +395,29 @@ def detect_finger(frame, render, face_coor):
     (frame_height, frame_width) = frame.shape[:2]
 
     # flood fill the face and neck region, so we can remove face region when detect fingers
-    neck_height = 20
-    bottom += neck_height
+    extra_bottom = 50
+    bottom += extra_bottom
 
+    extra_left = 10
+    left -= extra_left
+
+    extra_right = 10
+    right += extra_right
+
+    extra_top = 10
+    top -= extra_top
 
     if (bottom + 2) > frame_height:
         bottom = frame_height - 3
+    if (top - 2) < 0:
+        top = 0 + 3
+    if (right + 2) > frame_width:
+        right = frame_width - 3
+    if (left - 2) < 0:
+        left = 0 + 3
+
+
+    cv2.rectangle(render, (left, top), (right, bottom), (0, 0, 255), 2)
 
     width = right - left
     height = bottom - top
@@ -408,12 +425,14 @@ def detect_finger(frame, render, face_coor):
     if width is not 0 and height is not 0:
 
         frame_roi = frame[top:bottom, left:right]
-        white_mask = np.zeros((height + 2, width + 2), np.uint8)
-        cv2.floodFill(frame_roi, white_mask, (0, 0), (255, 255, 255))
+        black_box = np.zeros(frame_roi.shape, np.uint8)
+        # white_mask = np.zeros((height + 2, width + 2), np.uint8)
+        # cv2.floodFill(frame_roi, white_mask, (0, 0), (255, 255, 255))
+        #
+        # frame_roi = cv2.bitwise_not(frame_roi)
 
-        frame_roi = cv2.bitwise_not(frame_roi)
-
-        frame[top:bottom, left:right] = frame_roi
+        # frame[top:bottom, left:right] = frame_roi
+        frame[top:bottom, left:right] = black_box
 
     # to get the background, keep looking till a threshold is read
     # so that our running average models gets calibrated
@@ -608,13 +627,13 @@ if __name__ == "__main__":
     # status 3 : add on face
     # status 4 : drag from face to exhibit
 
-    mask_status = {"res/ironman.png" : 1, "res/mustache.png" : 1 }
+    mask_status = {"res/ironman.png" : 1,  "res/cat_ears2.png" : 1, "res/funny_glasses.png" : 1}
 
     # mask_coors = {"mask_name": [top, bottom, left, right]}
-    mask_coors = {"res/ironman.png": [0, 0, 0, 0], "res/mustache.png": [0, 0, 0, 0]}
+    mask_coors = {"res/ironman.png": [0, 0, 0, 0], "res/cat_ears2.png": [0, 0, 0, 0], "res/funny_glasses.png" : [0, 0, 0, 0]}
 
     #  mask_info = {"mask_name": [imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth]}
-    mask_info = {"res/ironman.png": [[], [], [], [], []], "res/mustache.png": [[], [], [], [], []]}
+    mask_info = {"res/ironman.png": [[], [], [], [], []],  "res/cat_ears2.png": [[], [], [], [], []], "res/funny_glasses.png" :[[], [], [], [], []]}
 
     # initialize the coordinate of masks
     initialize_mask_dict(mask_coors, video_capture.get(4), video_capture.get(3))

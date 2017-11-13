@@ -36,9 +36,9 @@ def segment_hybird(frame):
 
     erosion = cv2.erode(mask, disk(1), iterations=1)
     dilation = cv2.dilate(erosion, disk(4), iterations=1)
-    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(5))
+    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(15))
 
-    mask = sfr.median(mask, disk(5))
+    mask = sfr.median(mask, disk(3))
 
     cv2.imshow("show", mask)
 
