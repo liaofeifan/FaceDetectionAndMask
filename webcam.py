@@ -74,6 +74,7 @@ def segment_ycrcb(frame):
 
     mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
+    cv2.imshow("show", mask2)
     # Kernel matrices for morphological transformation
     kernel_square = np.ones((11, 11), np.uint8)
     kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
@@ -174,7 +175,7 @@ if __name__ == "__main__":
 
         #---------------------------finger--------------
 
-        hand = segment_hsv(frame)
+        hand = segment_ycrcb(frame)
 
         # check whether hand region is segmented
         if hand is not None:
@@ -194,7 +195,7 @@ if __name__ == "__main__":
 
 
 
-        cv2.imshow('frame',render)
+        # cv2.imshow('frame',render)
 
         if cv2.waitKey(1) &0xFF == ord('q'):
             break

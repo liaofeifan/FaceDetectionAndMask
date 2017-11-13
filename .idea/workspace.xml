@@ -2,10 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="18eb4912-80ea-401b-ae6c-5193c4b2acdc" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/painting.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/test_color.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mask_v_0.2.py" afterPath="$PROJECT_DIR$/mask_v_0.2.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/test.py" afterPath="$PROJECT_DIR$/test.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/webcam.py" afterPath="$PROJECT_DIR$/webcam.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,11 +17,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="webcam.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/webcam.py">
+      <file leaf-file-name="test_color.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/test_color.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1695">
-              <caret line="114" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="208" selection-end-column="0" />
+            <state relative-caret-position="265">
+              <caret line="30" column="4" lean-forward="true" selection-start-line="30" selection-start-column="4" selection-end-line="34" selection-end-column="61" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -28,144 +29,27 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="change_mask_size_by_finger.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/change_mask_size_by_finger.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2520">
-              <caret line="555" column="25" lean-forward="false" selection-start-line="555" selection-start-column="25" selection-end-line="555" selection-end-column="25" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#206#589#0" expanded="false" />
-                <element signature="e#786#1325#0" expanded="false" />
-                <element signature="e#1561#2250#0" expanded="false" />
-                <element signature="e#2573#2988#0" expanded="false" />
-                <element signature="e#3132#3531#0" expanded="false" />
-                <element signature="e#3969#4030#0" expanded="false" />
-                <element signature="e#4300#5790#0" expanded="false" />
-                <element signature="e#6049#7643#0" expanded="false" />
-                <element signature="e#7924#8303#0" expanded="false" />
-                <element signature="e#8521#9845#0" expanded="false" />
-                <element signature="e#10159#11234#0" expanded="false" />
-                <element signature="e#11567#12834#0" expanded="false" />
-                <element signature="e#13075#14700#0" expanded="false" />
-                <element signature="e#14876#15136#0" expanded="false" />
-                <element signature="e#15319#15753#0" expanded="false" />
-                <element signature="e#15907#15982#0" expanded="false" />
-                <element signature="e#16197#19546#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mask_example.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mask_example.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="675">
-              <caret line="45" column="49" lean-forward="false" selection-start-line="45" selection-start-column="31" selection-end-line="45" selection-end-column="49" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/test.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="30">
-              <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-                <marker date="1510493960267" expanded="true" signature="48:53" ph="..." />
-                <marker date="1510493960267" expanded="true" signature="1319:1419" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="finger_with_no_face.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/finger_with_no_face.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3675">
-              <caret line="329" column="44" lean-forward="false" selection-start-line="329" selection-start-column="44" selection-end-line="329" selection-end-column="44" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#704#1171#0" expanded="false" />
-                <element signature="e#1339#1398#0" expanded="false" />
-                <element signature="e#1569#3060#0" expanded="false" />
-                <element signature="e#5200#5608#0" expanded="false" />
-                <element signature="e#5900#7232#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="HandDetection.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/HandDetection.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="71">
-              <caret line="87" column="26" lean-forward="true" selection-start-line="87" selection-start-column="26" selection-end-line="87" selection-end-column="26" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="test_overlay.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/test_overlay.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1305">
-              <caret line="87" column="59" lean-forward="false" selection-start-line="87" selection-start-column="59" selection-end-line="87" selection-end-column="59" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mask_v_0.2.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="mask_v_0.2.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/mask_v_0.2.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="182">
-              <caret line="105" column="81" lean-forward="true" selection-start-line="103" selection-start-column="4" selection-end-line="105" selection-end-column="81" />
+            <state relative-caret-position="266">
+              <caret line="212" column="32" lean-forward="false" selection-start-line="212" selection-start-column="32" selection-end-line="212" selection-end-column="32" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#206#589#0" expanded="false" />
-                <element signature="e#786#1325#0" expanded="false" />
-                <element signature="e#1561#2250#0" expanded="false" />
-                <element signature="e#2573#2988#0" expanded="false" />
-                <element signature="e#3969#4030#0" expanded="false" />
-                <element signature="e#6049#7643#0" expanded="false" />
-                <element signature="e#7924#8303#0" expanded="false" />
-                <element signature="e#8521#9845#0" expanded="false" />
-                <element signature="e#10159#11190#0" expanded="false" />
-                <element signature="e#11523#12895#0" expanded="false" />
-                <element signature="e#13136#14761#0" expanded="false" />
-                <element signature="e#14937#15197#0" expanded="false" />
-                <element signature="e#15380#15822#0" expanded="false" />
-                <element signature="e#15976#16051#0" expanded="false" />
-                <element signature="e#16266#19637#0" expanded="false" />
-                <element signature="e#19867#21348#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="painting.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/painting.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="213">
-              <caret line="30" column="79" lean-forward="false" selection-start-line="30" selection-start-column="79" selection-end-line="30" selection-end-column="79" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
-                <element signature="e#2922#4294#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="mask v 0.1.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/mask v 0.1.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="5820">
-              <caret line="390" column="49" lean-forward="false" selection-start-line="390" selection-start-column="4" selection-end-line="390" selection-end-column="49" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
+                <element signature="e#1138#1677#0" expanded="false" />
+                <element signature="e#1913#2602#0" expanded="false" />
+                <element signature="e#2925#3340#0" expanded="false" />
+                <element signature="e#4321#4382#0" expanded="false" />
+                <element signature="e#4652#6135#0" expanded="false" />
+                <element signature="e#10603#10982#0" expanded="false" />
+                <element signature="e#11200#12524#0" expanded="false" />
+                <element signature="e#12838#13869#0" expanded="false" />
+                <element signature="e#14202#15574#0" expanded="false" />
+                <element signature="e#17619#17879#0" expanded="false" />
+                <element signature="e#18062#18504#0" expanded="false" />
+                <element signature="e#18658#18733#0" expanded="false" />
+                <element signature="e#18948#22319#0" expanded="false" />
+                <element signature="e#22549#24030#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -209,22 +93,23 @@
         <option value="$PROJECT_DIR$/finger_with_no_face.py" />
         <option value="$PROJECT_DIR$/mask.py" />
         <option value="$PROJECT_DIR$/hand_detect_stable_want_use.py" />
-        <option value="$PROJECT_DIR$/webcam.py" />
         <option value="$PROJECT_DIR$/test_overlay.py" />
         <option value="$PROJECT_DIR$/drag.py" />
         <option value="$PROJECT_DIR$/mask_example.py" />
         <option value="$PROJECT_DIR$/overlay.py" />
         <option value="$PROJECT_DIR$/model/change_mask_size_by_finger.py" />
         <option value="$PROJECT_DIR$/change_mask_size_by_finger.py" />
-        <option value="$PROJECT_DIR$/mask_v_0.2.py" />
         <option value="$PROJECT_DIR$/painting.py" />
+        <option value="$PROJECT_DIR$/webcam.py" />
         <option value="$PROJECT_DIR$/test.py" />
+        <option value="$PROJECT_DIR$/test_color.py" />
+        <option value="$PROJECT_DIR$/mask_v_0.2.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="41" />
-    <option name="y" value="23" />
+    <option name="x" value="316" />
+    <option name="y" value="24" />
     <option name="width" value="1227" />
     <option name="height" value="777" />
   </component>
@@ -243,7 +128,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -255,6 +139,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scratches" />
       <pane id="Scope" />
     </panes>
   </component>
@@ -274,7 +159,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.painting">
+  <component name="RunManager" selected="Python.mask_v_0.2">
     <configuration name="Unnamed" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -288,40 +173,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="mask" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/addPicture.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="change_mask_size_by_finger" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="mask" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/change_mask_size_by_finger.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
-    <configuration name="mask_example" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="mask" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/mask_example.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -377,21 +228,55 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
     </configuration>
+    <configuration name="test_color" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="mask" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test_color.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
+    <configuration name="webcam" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="mask" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/webcam.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
     <list size="6">
       <item index="0" class="java.lang.String" itemvalue="Python.Unnamed" />
       <item index="1" class="java.lang.String" itemvalue="Python.test" />
       <item index="2" class="java.lang.String" itemvalue="Python.mask_v_0.2" />
-      <item index="3" class="java.lang.String" itemvalue="Python.mask_example" />
-      <item index="4" class="java.lang.String" itemvalue="Python.change_mask_size_by_finger" />
-      <item index="5" class="java.lang.String" itemvalue="Python.painting" />
+      <item index="3" class="java.lang.String" itemvalue="Python.painting" />
+      <item index="4" class="java.lang.String" itemvalue="Python.webcam" />
+      <item index="5" class="java.lang.String" itemvalue="Python.test_color" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.painting" />
-        <item index="1" class="java.lang.String" itemvalue="Python.mask_v_0.2" />
-        <item index="2" class="java.lang.String" itemvalue="Python.change_mask_size_by_finger" />
-        <item index="3" class="java.lang.String" itemvalue="Python.test" />
-        <item index="4" class="java.lang.String" itemvalue="Python.mask_example" />
+        <item index="0" class="java.lang.String" itemvalue="Python.mask_v_0.2" />
+        <item index="1" class="java.lang.String" itemvalue="Python.test_color" />
+        <item index="2" class="java.lang.String" itemvalue="Python.test" />
+        <item index="3" class="java.lang.String" itemvalue="Python.webcam" />
+        <item index="4" class="java.lang.String" itemvalue="Python.painting" />
       </list>
     </recent_temporary>
   </component>
@@ -412,13 +297,13 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="41" y="23" width="1227" height="777" extended-state="0" />
+    <frame x="316" y="24" width="1227" height="777" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.23553382" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2567376" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2567376" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -471,45 +356,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="6" />
+      <option name="time" value="7" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/hand_detect_stable_want_use.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1605">
-          <caret line="109" column="3" lean-forward="true" selection-start-line="109" selection-start-column="3" selection-end-line="114" selection-end-column="81" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/change_mask_size_by_finger.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3105">
-          <caret line="594" column="27" lean-forward="false" selection-start-line="594" selection-start-column="27" selection-end-line="594" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#206#589#0" expanded="false" />
-            <element signature="e#786#1325#0" expanded="false" />
-            <element signature="e#1561#2250#0" expanded="false" />
-            <element signature="e#2573#2988#0" expanded="false" />
-            <element signature="e#3132#3531#0" expanded="false" />
-            <element signature="e#3969#4030#0" expanded="false" />
-            <element signature="e#4300#5790#0" expanded="false" />
-            <element signature="e#6049#7643#0" expanded="false" />
-            <element signature="e#7924#8303#0" expanded="false" />
-            <element signature="e#8521#9845#0" expanded="false" />
-            <element signature="e#10159#11234#0" expanded="false" />
-            <element signature="e#11567#12834#0" expanded="false" />
-            <element signature="e#13075#14700#0" expanded="false" />
-            <element signature="e#14876#15136#0" expanded="false" />
-            <element signature="e#15319#15753#0" expanded="false" />
-            <element signature="e#15907#15982#0" expanded="false" />
-            <element signature="e#16197#19546#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/drag.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -523,7 +374,7 @@
         <state relative-caret-position="2010">
           <caret line="258" column="0" lean-forward="false" selection-start-line="215" selection-start-column="8" selection-end-line="258" selection-end-column="0" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
             <element signature="e#704#1171#0" expanded="false" />
             <element signature="e#1339#1398#0" expanded="false" />
             <element signature="e#1569#3060#0" expanded="false" />
@@ -538,9 +389,22 @@
         <state relative-caret-position="495">
           <caret line="33" column="46" lean-forward="false" selection-start-line="33" selection-start-column="46" selection-end-line="33" selection-end-column="46" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <marker date="1510493960267" expanded="true" signature="48:53" ph="..." />
-            <marker date="1510493960267" expanded="true" signature="1319:1419" ph="..." />
+            <element signature="e#0#10#0" expanded="false" />
+            <element signature="e#1067#1606#0" expanded="false" />
+            <element signature="e#1842#2531#0" expanded="false" />
+            <element signature="e#2854#3269#0" expanded="false" />
+            <element signature="e#4250#4311#0" expanded="false" />
+            <element signature="e#4581#6064#0" expanded="false" />
+            <element signature="e#6326#7918#0" expanded="false" />
+            <element signature="e#8202#8581#0" expanded="false" />
+            <element signature="e#8799#10123#0" expanded="false" />
+            <element signature="e#10437#11468#0" expanded="false" />
+            <element signature="e#11801#13173#0" expanded="false" />
+            <element signature="e#15217#15477#0" expanded="false" />
+            <element signature="e#15660#16102#0" expanded="false" />
+            <element signature="e#16256#16331#0" expanded="false" />
+            <element signature="e#16546#19917#0" expanded="false" />
+            <element signature="e#20147#21628#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -564,7 +428,7 @@
         <state relative-caret-position="3000">
           <caret line="200" column="17" lean-forward="false" selection-start-line="200" selection-start-column="17" selection-end-line="200" selection-end-column="17" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -581,7 +445,7 @@
         <state relative-caret-position="405">
           <caret line="27" column="4" lean-forward="false" selection-start-line="27" selection-start-column="4" selection-end-line="27" selection-end-column="4" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -613,7 +477,7 @@
         <state relative-caret-position="300">
           <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -645,7 +509,7 @@
         <state relative-caret-position="300">
           <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -684,7 +548,7 @@
         <state relative-caret-position="300">
           <caret line="20" column="0" lean-forward="false" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -701,7 +565,7 @@
         <state relative-caret-position="420">
           <caret line="28" column="60" lean-forward="false" selection-start-line="28" selection-start-column="60" selection-end-line="28" selection-end-column="60" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -749,13 +613,6 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mask.py" />
-    <entry file="file://$PROJECT_DIR$/hand_detect_stable_want_use.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1605">
-          <caret line="109" column="3" lean-forward="false" selection-start-line="109" selection-start-column="3" selection-end-line="114" selection-end-column="81" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/exhibition_mask.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-146">
@@ -782,44 +639,34 @@
         <state relative-caret-position="5820">
           <caret line="390" column="49" lean-forward="false" selection-start-line="390" selection-start-column="4" selection-end-line="390" selection-end-column="49" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/model/change_mask_size_by_finger.py" />
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2017.2/python_stubs/-1960479069/cv2/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="166">
+          <caret line="1773" column="4" lean-forward="false" selection-start-line="1773" selection-start-column="4" selection-end-line="1773" selection-end-column="4" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/mask_example.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="675">
+        <state relative-caret-position="447">
           <caret line="45" column="49" lean-forward="false" selection-start-line="45" selection-start-column="31" selection-end-line="45" selection-end-column="49" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/test_overlay.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1305">
-          <caret line="87" column="59" lean-forward="false" selection-start-line="87" selection-start-column="59" selection-end-line="87" selection-end-column="59" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/model/change_mask_size_by_finger.py" />
-    <entry file="file://$PROJECT_DIR$/webcam.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1695">
-          <caret line="114" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="208" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/change_mask_size_by_finger.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2520">
+        <state relative-caret-position="447">
           <caret line="555" column="25" lean-forward="false" selection-start-line="555" selection-start-column="25" selection-end-line="555" selection-end-column="25" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
             <element signature="e#206#589#0" expanded="false" />
             <element signature="e#786#1325#0" expanded="false" />
             <element signature="e#1561#2250#0" expanded="false" />
@@ -841,12 +688,22 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/webcam.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="159">
+          <caret line="169" column="0" lean-forward="false" selection-start-line="169" selection-start-column="0" selection-end-line="169" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/finger_with_no_face.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3675">
+        <state relative-caret-position="447">
           <caret line="329" column="44" lean-forward="false" selection-start-line="329" selection-start-column="44" selection-end-line="329" selection-end-column="44" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
             <element signature="e#704#1171#0" expanded="false" />
             <element signature="e#1339#1398#0" expanded="false" />
             <element signature="e#1569#3060#0" expanded="false" />
@@ -856,37 +713,19 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HandDetection.py">
+    <entry file="file://$PROJECT_DIR$/test_overlay.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="71">
-          <caret line="87" column="26" lean-forward="true" selection-start-line="87" selection-start-column="26" selection-end-line="87" selection-end-column="26" />
+        <state relative-caret-position="447">
+          <caret line="87" column="59" lean-forward="false" selection-start-line="87" selection-start-column="59" selection-end-line="87" selection-end-column="59" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/mask_v_0.2.py">
+    <entry file="file://$PROJECT_DIR$/HandDetection.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="105" column="81" lean-forward="true" selection-start-line="103" selection-start-column="4" selection-end-line="105" selection-end-column="81" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#206#589#0" expanded="false" />
-            <element signature="e#786#1325#0" expanded="false" />
-            <element signature="e#1561#2250#0" expanded="false" />
-            <element signature="e#2573#2988#0" expanded="false" />
-            <element signature="e#3969#4030#0" expanded="false" />
-            <element signature="e#6049#7643#0" expanded="false" />
-            <element signature="e#7924#8303#0" expanded="false" />
-            <element signature="e#8521#9845#0" expanded="false" />
-            <element signature="e#10159#11190#0" expanded="false" />
-            <element signature="e#11523#12895#0" expanded="false" />
-            <element signature="e#13136#14761#0" expanded="false" />
-            <element signature="e#14937#15197#0" expanded="false" />
-            <element signature="e#15380#15822#0" expanded="false" />
-            <element signature="e#15976#16051#0" expanded="false" />
-            <element signature="e#16266#19637#0" expanded="false" />
-            <element signature="e#19867#21348#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="-4">
+          <caret line="82" column="16" lean-forward="true" selection-start-line="82" selection-start-column="16" selection-end-line="82" selection-end-column="16" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -895,7 +734,7 @@
         <state relative-caret-position="213">
           <caret line="30" column="79" lean-forward="false" selection-start-line="30" selection-start-column="79" selection-end-line="30" selection-end-column="79" />
           <folding>
-            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#0#10#0" expanded="false" />
             <element signature="e#2922#4294#0" expanded="false" />
           </folding>
         </state>
@@ -903,12 +742,67 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="0" lean-forward="true" selection-start-line="2" selection-start-column="0" selection-end-line="2" selection-end-column="0" />
+        <state relative-caret-position="267">
+          <caret line="656" column="0" lean-forward="true" selection-start-line="656" selection-start-column="0" selection-end-line="656" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#10#0" expanded="false" />
+            <element signature="e#1067#1606#0" expanded="false" />
+            <element signature="e#1842#2531#0" expanded="false" />
+            <element signature="e#2854#3269#0" expanded="false" />
+            <element signature="e#4250#4311#0" expanded="false" />
+            <element signature="e#4581#6064#0" expanded="false" />
+            <element signature="e#6326#7918#0" expanded="false" />
+            <element signature="e#8202#8581#0" expanded="false" />
+            <element signature="e#8799#10123#0" expanded="false" />
+            <element signature="e#10437#11468#0" expanded="false" />
+            <element signature="e#11801#13173#0" expanded="false" />
+            <element signature="e#15217#15477#0" expanded="false" />
+            <element signature="e#15660#16102#0" expanded="false" />
+            <element signature="e#16256#16331#0" expanded="false" />
+            <element signature="e#16546#19917#0" expanded="false" />
+            <element signature="e#20147#21628#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/hand_detect_stable_want_use.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1605">
+          <caret line="109" column="3" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="203" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/test_color.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="265">
+          <caret line="30" column="4" lean-forward="true" selection-start-line="30" selection-start-column="4" selection-end-line="34" selection-end-column="61" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
-            <marker date="1510493960267" expanded="true" signature="48:53" ph="..." />
-            <marker date="1510493960267" expanded="true" signature="1319:1419" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/mask_v_0.2.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="266">
+          <caret line="212" column="32" lean-forward="false" selection-start-line="212" selection-start-column="32" selection-end-line="212" selection-end-column="32" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#1138#1677#0" expanded="false" />
+            <element signature="e#1913#2602#0" expanded="false" />
+            <element signature="e#2925#3340#0" expanded="false" />
+            <element signature="e#4321#4382#0" expanded="false" />
+            <element signature="e#4652#6135#0" expanded="false" />
+            <element signature="e#10603#10982#0" expanded="false" />
+            <element signature="e#11200#12524#0" expanded="false" />
+            <element signature="e#12838#13869#0" expanded="false" />
+            <element signature="e#14202#15574#0" expanded="false" />
+            <element signature="e#17619#17879#0" expanded="false" />
+            <element signature="e#18062#18504#0" expanded="false" />
+            <element signature="e#18658#18733#0" expanded="false" />
+            <element signature="e#18948#22319#0" expanded="false" />
+            <element signature="e#22549#24030#0" expanded="false" />
           </folding>
         </state>
       </provider>

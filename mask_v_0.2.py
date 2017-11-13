@@ -1,6 +1,8 @@
 import cv2
 import imutils
 import numpy as np
+from skimage.morphology import disk
+import skimage.filters.rank as sfr
 
 
 #--------------------------------------------------------------------------
@@ -10,12 +12,16 @@ def load_Classifiers():
     baseCascadePath = "./model/"
     faceCascadeFilePath = baseCascadePath + "haarcascade_frontalface_default.xml"
     noseCascadeFilePath = baseCascadePath + "haarcascade_mcs_nose.xml"
+    fistCascadeFilePath = baseCascadePath + "haarcascade_mcs_nose.xml"
+    eyeCascadeFilePath = baseCascadePath + "haarcascade_eye.xml"
 
     # build our cv2 Cascade Classifiers
     faceCascade = cv2.CascadeClassifier(faceCascadeFilePath)
     noseCascade = cv2.CascadeClassifier(noseCascadeFilePath)
+    fistCascade = cv2.CascadeClassifier(fistCascadeFilePath)
+    eyeCascade = cv2.CascadeClassifier(eyeCascadeFilePath)
 
-    return (faceCascade, noseCascade)
+    return (faceCascade, noseCascade, fistCascade, eyeCascade)
 
 
 #--------------------------------------------------------------------------
@@ -134,7 +140,7 @@ def segment_ycrcb(frame):
         return
     else:
         segmented = max(contours, key=cv2.contourArea)
-        return (thresh, segmented)
+    return (thresh, segmented)
 
 
 # --------------------------------------------------------------------------
@@ -180,6 +186,61 @@ def segment_hsv(frame):
     else:
         segmented = max(contours, key=cv2.contourArea)
     return (thresh, segmented)
+
+# --------------------------------------------------------------------------
+# use hsv to segment the mask and get the finger contour
+# i prefer to use HSV when in the classroom
+# return (thresh, segmented) or none if not detected
+def segment_hybird(frame):
+    # Convert to HSV color space
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Convert to ycrcb color space
+    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+
+    mask_hsv1 = cv2.inRange(hsv, np.array([0, 51, 102]), np.array([25 / 2, 153, 255]))
+    mask_hsv2 = cv2.inRange(hsv, np.array([335 / 2, 51, 102]), np.array([360 / 2, 153, 255]))
+    mask1 = np.array([])
+    mask1 = cv2.bitwise_or(mask_hsv1, mask_hsv2, mask1)
+
+    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
+
+    mask = np.array([])
+    mask = cv2.bitwise_and(mask1, mask2, mask)
+
+    mask = sfr.median(mask, disk(5))
+
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
+    # # Kernel matrices for morphological transformation
+    # kernel_square = np.ones((11, 11), np.uint8)
+    # kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    #
+    # # Perform morphological transformations to filter out the background noise
+    # # Dilation increase skin color area
+    # # Erosion increase skin color area
+    # dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
+    # erosion = cv2.erode(dilation, kernel_square, iterations=1)
+    # dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
+    # filtered = cv2.medianBlur(dilation2, 5)
+    # kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
+    # dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
+    # kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    # dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
+    # # ??????
+    # median = cv2.medianBlur(dilation2, 5)
+    #
+    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
+
+
+    # Find contours of the filtered frame
+    _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+
+    if len(contours) == 0:
+        return
+    else:
+        segmented = max(contours, key=cv2.contourArea)
+    return (mask, segmented)
 
 #-----------------------------------------------------------------------------
 # resize the mask to DecorationWidth and DecorationHeight
@@ -375,7 +436,7 @@ def detect_finger(frame, render, face_coor):
     # so that our running average models gets calibrated
 
     # segment the hand region
-    hand = segment_hsv(frame)
+    hand = segment_hybird(frame)
 
     extreme_top = [0,0]
 
@@ -579,7 +640,7 @@ if __name__ == "__main__":
     initialize_mask_info(mask_info)
 
     # load face, fist and nose Classifiers
-    (faceCascade, noseCascade, fistCascade) = load_Classifiers()
+    (faceCascade, noseCascade, fistCascade, eyeCascade) = load_Classifiers()
 
 
     # count how many frames drag be shadowed
