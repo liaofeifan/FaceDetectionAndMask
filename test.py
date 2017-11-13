@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 
+
 def change(dic):
     for i,j in dic.iteritems():
         j = "bfs"

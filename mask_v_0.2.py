@@ -578,8 +578,9 @@ if __name__ == "__main__":
     # initialize the information of masks
     initialize_mask_info(mask_info)
 
-    # load face and nose Classifiers
-    (faceCascade, noseCascade) = load_Classifiers()
+    # load face, fist and nose Classifiers
+    (faceCascade, noseCascade, fistCascade) = load_Classifiers()
+
 
     # count how many frames drag be shadowed
     state_4_count = 0
@@ -621,8 +622,10 @@ if __name__ == "__main__":
         # phase 4: finger point to return botton, do not show mask, just show frame and continue
         # -----------------------------------------------------------------------------
 
-        if is_click(frame, render,extreme_top):
+        # if is_click(frame, render,extreme_top):
+        if False:
             print "clicked!"
+
             cv2.circle(render, extreme_top, 8, (0, 255, 255), -1)
             clear_mask_status(mask_status)
             display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, mask_coors, mask_info)
