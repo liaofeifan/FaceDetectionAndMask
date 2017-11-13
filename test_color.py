@@ -30,46 +30,30 @@ def segment_hybird(frame):
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
 
-    mask2 = sfr.median(mask, disk(5))
 
-    mask2 = cv2.morphologyEx(mask2, cv2.MORPH_CLOSE, disk(5))
+    # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
+    # mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, disk(5))
 
-    # mask2 = mask
+    erosion = cv2.erode(mask, disk(1), iterations=1)
+    dilation = cv2.dilate(erosion, disk(4), iterations=1)
+    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(5))
 
-    cv2.imshow("show", mask2)
-    # Kernel matrices for morphological transformation
-    kernel_square = np.ones((11, 11), np.uint8)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    mask = sfr.median(mask, disk(5))
 
-    # Perform morphological transformations to filter out the background noise
-    # Dilation increase skin color area
-    # Erosion increase skin color area
-    dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
-    erosion = cv2.erode(dilation, kernel_square, iterations=1)
-    dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
-    filtered = cv2.medianBlur(dilation2, 5)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
-    dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    # ??????
-    median = cv2.medianBlur(dilation3, 5)
-    # cv2.imshow("show", median)
+    cv2.imshow("show", mask)
 
-    thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
-    # thresh = sfr.median(thresh, disk(5))
-    # cv2.imshow("show", thresh)
+
+
 
 
     # Find contours of the filtered frame
-    _, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
     if len(contours) == 0:
         return
     else:
         segmented = max(contours, key=cv2.contourArea)
-    return (thresh, segmented)
+    return (mask, segmented)
 
 
 # get fingers extreme points

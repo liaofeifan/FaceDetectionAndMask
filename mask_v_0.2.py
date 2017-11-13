@@ -12,7 +12,7 @@ def load_Classifiers():
     baseCascadePath = "./model/"
     faceCascadeFilePath = baseCascadePath + "haarcascade_frontalface_default.xml"
     noseCascadeFilePath = baseCascadePath + "haarcascade_mcs_nose.xml"
-    fistCascadeFilePath = baseCascadePath + "haarcascade_mcs_nose.xml"
+    fistCascadeFilePath = baseCascadePath + "fist.xml"
     eyeCascadeFilePath = baseCascadePath + "haarcascade_eye.xml"
 
     # build our cv2 Cascade Classifiers
@@ -208,29 +208,12 @@ def segment_hybird(frame):
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
 
-    mask = sfr.median(mask, disk(5))
+   
+    erosion = cv2.erode(mask, disk(1), iterations=1)
+    dilation = cv2.dilate(erosion, disk(4), iterations=1)
+    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(5))
 
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
-    # # Kernel matrices for morphological transformation
-    # kernel_square = np.ones((11, 11), np.uint8)
-    # kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    #
-    # # Perform morphological transformations to filter out the background noise
-    # # Dilation increase skin color area
-    # # Erosion increase skin color area
-    # dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
-    # erosion = cv2.erode(dilation, kernel_square, iterations=1)
-    # dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
-    # filtered = cv2.medianBlur(dilation2, 5)
-    # kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
-    # dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    # kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    # dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    # # ??????
-    # median = cv2.medianBlur(dilation2, 5)
-    #
-    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
+    mask = sfr.median(mask, disk(5))
 
 
     # Find contours of the filtered frame

@@ -1,5 +1,8 @@
 import cv2
+import imutils
 import numpy as np
+from skimage.morphology import disk
+import skimage.filters.rank as sfr
 
 stop_time = 100
 
@@ -23,37 +26,30 @@ def load_Classifiers():
 # use hsv to segment the mask and get the finger contour
 # i prefer to use HSV when in the classroom
 # return (thresh, segmented) or none if not detected
-def segment_hsv(frame):
+def segment_hybird(frame):
     # Convert to HSV color space
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-    # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
+    # Convert to ycrcb color space
+    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
 
-    # Kernel matrices for morphological transformation
-    kernel_square = np.ones((11, 11), np.uint8)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    mask_hsv1 = cv2.inRange(hsv, np.array([0, 51, 102]), np.array([25 / 2, 153, 255]))
+    mask_hsv2 = cv2.inRange(hsv, np.array([335 / 2, 51, 102]), np.array([360 / 2, 153, 255]))
+    mask1 = np.array([])
+    mask1 = cv2.bitwise_or(mask_hsv1, mask_hsv2, mask1)
 
-    # Perform morphological transformations to filter out the background noise
-    # Dilation increase skin color area
-    # Erosion increase skin color area
-    dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
-    erosion = cv2.erode(dilation, kernel_square, iterations=1)
-    dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
-    filtered = cv2.medianBlur(dilation2, 5)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
-    dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    # ??????
-    median = cv2.medianBlur(dilation2, 5)
+    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
 
-    thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
+    mask = np.array([])
+    mask = cv2.bitwise_and(mask1, mask2, mask)
+
+    mask = sfr.median(mask, disk(5))
+
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
 
 
     # Find contours of the filtered frame
-    _, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
     cnt = contours[0]
 
     hull = cv2.convexHull(cnt, returnPoints=False)
@@ -64,7 +60,7 @@ def segment_hsv(frame):
         return
     else:
         segmented = max(contours, key=cv2.contourArea)
-    return (thresh, segmented, cnt, hull, defects)
+    return (mask, segmented, cnt, hull, defects)
 
 
 
@@ -174,7 +170,7 @@ def detect_finger(frame, render, face_coor):
     # so that our running average models gets calibrated
 
     # segment the hand region
-    hand = segment_hsv(frame)
+    hand = segment_hybird(frame)
 
     extreme_top = [0,0]
 
