@@ -3,6 +3,7 @@ import imutils
 import numpy as np
 from skimage.morphology import disk
 import skimage.filters.rank as sfr
+import os
 
 
 #--------------------------------------------------------------------------
@@ -634,6 +635,14 @@ def create_alpha_mask(painted_mask):
 
     return to_save_mask
 
+#-----------------------------------------------------------------------------
+# dirte create
+def dirty_create(painted_mask):
+    p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
+    white_paper = np.zeros((p_h, p_w, 3), np.uint8)
+    save_painted_mask = create_alpha_mask(white_paper)
+    cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+
 
 if __name__ == "__main__":
 
@@ -649,6 +658,15 @@ if __name__ == "__main__":
     # get frame weight and frame height
     w, h = video_capture.get(3), video_capture.get(4)
 
+    # roi to self-draw the mask
+    paper_coor = [0, int(0.5 * h), 0, int(0.5 * w)]
+
+    # roi to save the mask
+    painted_mask = np.zeros((paper_coor[1] - paper_coor[0], paper_coor[3] - paper_coor[2], 3), np.uint8)
+
+    # create an empty self_mask.png
+    dirty_create(painted_mask)
+
     # work status
     # status 1: display-drag
     # status 2: draw
@@ -660,13 +678,14 @@ if __name__ == "__main__":
     # status 3 : add on face
     # status 4 : drag from face to exhibit
     # status 5 : clean the desktop when drawing
-
     mask_status = {"res/self_mask.png" : 1,  "res/cat_ears2.png" : 1, "res/funny_glasses.png" : 1}
+
 
     # mask_coors = {"mask_name": [top, bottom, left, right]}
     mask_coors = {"res/self_mask.png": [0, 0, 0, 0], "res/cat_ears2.png": [0, 0, 0, 0], "res/funny_glasses.png" : [0, 0, 0, 0]}
 
-    #  mask_info = {"mask_name": [imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth]}
+
+    # mask_info = {"mask_name": [imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth]}
     mask_info = {"res/self_mask.png": [[], [], [], [], []],  "res/cat_ears2.png": [[], [], [], [], []], "res/funny_glasses.png" :[[], [], [], [], []]}
 
     # initialize the coordinate of masks
@@ -748,12 +767,17 @@ if __name__ == "__main__":
             # change the work state to 2
             work_state = 2
             # and clean all the cache
-            finger_print_list = [[]]
-            p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
-            white_paper = np.zeros((p_h, p_w, 3), np.uint8)
-            save_painted_mask = create_alpha_mask(white_paper)
-            cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+            finger_print_list = [[]]''
+            painted_mask = np.zeros((paper_coor[1] - paper_coor[0], paper_coor[3] - paper_coor[2], 3), np.uint8)
+            # remore the self_mask
+            try:
+                os.remove("res/self_mask.png")
+            except OSError:
+                pass
 
+
+        # if click on return button
+        # return from drawing to drag-display
         if is_click(frame, render, extreme_top, return_button):
             set_mask_status(mask_status, 1)
             work_state = 1

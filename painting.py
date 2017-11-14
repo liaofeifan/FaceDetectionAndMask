@@ -3,6 +3,7 @@ import imutils
 import numpy as np
 from skimage.morphology import disk
 import skimage.filters.rank as sfr
+from PIL import Image
 
 stop_time = 100
 
@@ -53,7 +54,7 @@ def segment_hybird(frame):
     dilation = cv2.dilate(erosion, disk(4), iterations=1)
     mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(15))
 
-    mask = sfr.median(mask, disk(5))
+    # mask = sfr.median(mask, disk(5))
 
 
     # Find contours of the filtered frame
@@ -226,15 +227,29 @@ def get_extreme_points(segmented):
     return extreme_top, extreme_bottom, extreme_left, extreme_right
 
 
-def painting(frame, render, pts):
-    cv2.polylines(render, [np.array(pts)], False, (255, 0, 0), 4)
-    return render
+
+def painting(frame, render, pts_list, paper_coor, roi_white_paper):
+    cv2.rectangle(render,(paper_coor[2], paper_coor[0]), (paper_coor[1], paper_coor[3]), (0,0,155), 1)
+    roi_paper = render[paper_coor[0]:paper_coor[3], paper_coor[2]:paper_coor[1]]
+    if len(pts_list) != 0:
+        for pts in pts_list:
+            cv2.polylines(roi_paper, [np.array(pts)], False, (255, 0, 0), 4)
+            cv2.polylines(roi_white_paper, [np.array(pts)], False, (255, 0, 0), 4)
+
+
+    return render, roi_white_paper
+
+
+
+
+
 
 def is_fist(frame, segmented):
     if len(segmented) == 0:
         return False
     extreme_top, extreme_bottom, extreme_left, extreme_right = get_extreme_points(segmented)
     cnt = segmented
+    whole_area =  cv2.contourArea(cnt)
     hull = cv2.convexHull(cnt)
     moments = cv2.moments(cnt)
     if moments['m00'] != 0:
@@ -256,6 +271,45 @@ def is_fist(frame, segmented):
         return False
     return True
 
+def draw_mask(frame, render, segmented, extreme_top, finger_print_list, paper_coor, painted_mask):
+
+    # is one finger
+    if is_fist(frame, segmented) is not True:
+        finger_print_list[-1].append(extreme_top)
+
+    # is fist
+    else:
+        if finger_print_list[-1] != []:
+            finger_print_list.append([])
+
+    painting(frame, render, finger_print_list, paper_coor, painted_mask)
+    # print len(finger_print_list)
+
+    return render, painted_mask
+
+def is_click(frame, render, extreme_top):
+    frame_height, frame_width = frame.shape[:2]
+
+    click_coor = [frame_height - 50, frame_height, 0, 50]
+
+    cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (0, 255, 255), 2)
+
+    if extreme_top is not None:
+        if (extreme_top[0] <= click_coor[3] and extreme_top[0] >= click_coor[2]) and (extreme_top[1] >= click_coor[0] and extreme_top[1] <= click_coor[1]):
+            return True
+
+    return False
+
+def create_alpha_mask(painted_mask):
+    h,w = painted_mask.shape[:2]
+    to_save_mask = np.zeros((h,w,4), np.uint8)
+    for i in range(h):
+        for j in range(w):
+            to_save_mask[i,j,0], to_save_mask[i,j,1], to_save_mask[i,j,2] = \
+                painted_mask[i,j,0], painted_mask[i,j,1], painted_mask[i,j,2]
+            to_save_mask[i,j,3] = 155
+
+    return to_save_mask
 
 if __name__ == "__main__":
 
@@ -273,9 +327,12 @@ if __name__ == "__main__":
     # count how many frames drag be shadowed
     state_4_count = 0
 
-    finger_print = []
 
+    finger_print_list = [[]]
     stop_count = 0
+    w,h = video_capture.get(3), video_capture.get(4)
+    paper_coor = [0, int(0.5 * h), 0, int(0.5 * w)]
+    painted_mask = np.zeros((paper_coor[1] - paper_coor[0], paper_coor[3] - paper_coor[2], 3), np.uint8)
 
     while True:
 
@@ -309,16 +366,31 @@ if __name__ == "__main__":
         (render, extreme_top, segmented) = detect_finger(frame, render, face_coor)
 
 
-        if is_fist(frame, segmented) is not True:
-
-            finger_print.append(extreme_top)
-
-        painting(frame, render, finger_print)
+        draw_mask(frame, render, segmented, extreme_top, finger_print_list, paper_coor, painted_mask)
+        # print painted_mask
+        # if is_fist(frame, segmented) is True:
+        #
+        #
+        #
+        #
+        #     finger_print.append(extreme_top)
+        #
+        #
+        #
+        # painting(frame, render, finger_print_list)
+        if is_click(frame, render, extreme_top):
+            p_h, p_w = painted_mask[0], painted_mask[1]
+            # save_painted_mask = np.dstack((painted_mask, np.zeros((painted_mask.shape[:2]))))
+            # cv2.imwrite("res/test.png", save_painted_mask)
+            # save_painted_mask = cv2.cvtColor(painted_mask, cv2.COLOR_RGB2RGBA)
+            save_painted_mask = create_alpha_mask(painted_mask)
+            # print save_painted_mask.shape
+            cv2.imwrite("res/test.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
 
         # imshow the frame
         cv2.imshow('Video', render)
 
-        finger_print = []
+        # finger_print = []
         # press any key to exit
         # NOTE;  x86 systems may need to remove: " 0xFF == ord('q')"
         if cv2.waitKey(1) & 0xFF == ord('q'):

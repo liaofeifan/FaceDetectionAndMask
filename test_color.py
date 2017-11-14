@@ -1,7 +1,7 @@
 import cv2
 import imutils
 import numpy as np
-from skimage.morphology import disk
+from skimage.morphology import disk, erosion, dilation, opening, closing, white_tophat,black_tophat, skeletonize
 import skimage.filters.rank as sfr
 
 
@@ -29,6 +29,8 @@ def segment_hybird(frame):
 
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
+    # cv2.imshow("show", mask)
+
 
 
     # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, disk(5))
@@ -36,11 +38,17 @@ def segment_hybird(frame):
 
     erosion = cv2.erode(mask, disk(1), iterations=1)
     dilation = cv2.dilate(erosion, disk(4), iterations=1)
-    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(15))
+    mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(13))
 
-    mask = sfr.median(mask, disk(3))
+    # eros = erosion(mask, disk(1))
+    # dila = dilation(eros, disk(4))
 
-    cv2.imshow("show", mask)
+
+    # mask = sfr.median(dilation, disk(3))
+
+    # mask = cv2.erode(mask, disk(1), iterations=1)
+
+    cv2.imshow("show", dilation)
 
 
 
