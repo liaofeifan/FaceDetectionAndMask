@@ -388,6 +388,8 @@ def detect_finger(frame, render, face_coor):
 
     extreme_top = [0,0]
 
+    segmented = []
+
     # check whether hand region is segmented
     if hand is not None:
         # if yes, up[ack the threshold image and segmented region
@@ -562,17 +564,19 @@ def display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, 
 # draw the self-mask
 def draw_mask(frame, render, segmented, extreme_top, finger_print_list, paper_coor, painted_mask):
 
-    # is one finger
-    if is_fist(frame, segmented) is not True:
-        finger_print_list[-1].append(extreme_top)
+    if len(segmented) != 0:
 
-    # is fist
-    else:
-        if finger_print_list[-1] != []:
-            finger_print_list.append([])
+        # is one finger
+        if is_fist(frame, segmented) is not True:
+            finger_print_list[-1].append(extreme_top)
 
-    painting(frame, render, finger_print_list, paper_coor, painted_mask)
-    # print len(finger_print_list)
+        # is fist
+        else:
+            if finger_print_list[-1] != []:
+                finger_print_list.append([])
+
+        painting(frame, render, finger_print_list, paper_coor, painted_mask)
+        # print len(finger_print_list)
 
     return render, painted_mask
 
@@ -767,7 +771,7 @@ if __name__ == "__main__":
             # change the work state to 2
             work_state = 2
             # and clean all the cache
-            finger_print_list = [[]]''
+            finger_print_list = [[]]
             painted_mask = np.zeros((paper_coor[1] - paper_coor[0], paper_coor[3] - paper_coor[2], 3), np.uint8)
             # remore the self_mask
             try:
@@ -776,18 +780,18 @@ if __name__ == "__main__":
                 pass
 
 
-        # if click on return button
-        # return from drawing to drag-display
-        if is_click(frame, render, extreme_top, return_button):
-            set_mask_status(mask_status, 1)
-            work_state = 1
-            p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
-            # and save the mask
-            save_painted_mask = create_alpha_mask(painted_mask)
-            cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
-            # reload the masks
-            reload_mask_dict(mask_coors, frame.shape[0], frame.shape[1])
-            reload_mask_info(mask_info)
+            # if click on return button
+            # return from drawing to drag-display
+            if is_click(frame, render, extreme_top, return_button):
+                set_mask_status(mask_status, 1)
+                work_state = 1
+                p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
+                # and save the mask
+                save_painted_mask = create_alpha_mask(painted_mask)
+                cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+                # reload the masks
+                reload_mask_dict(mask_coors, frame.shape[0], frame.shape[1])
+                reload_mask_info(mask_info)
 
 
 
