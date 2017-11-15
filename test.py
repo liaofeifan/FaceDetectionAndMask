@@ -3,9 +3,9 @@ import numpy as np
 from PIL import Image
 
 
-a = {"a":1}
-a["b"] = 2
 
-print a
+print len((1,2))
+a = (1,2)
+print a[0]
 
 

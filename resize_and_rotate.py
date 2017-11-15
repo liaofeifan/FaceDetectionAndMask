@@ -15,6 +15,6 @@ rot = imutils.rotate_bound(img, 30)
 print img
 print rot
 
-cv2.imshow("show", rot)
+cv2.imshow("show", res)
 cv2.waitKey(0)
 cv2.destroyAllWindows()

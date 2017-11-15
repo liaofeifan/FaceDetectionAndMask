@@ -363,7 +363,7 @@ def detect_finger(frame, render, face_coor):
         left = 0 + 3
 
 
-    cv2.rectangle(render, (left, top), (right, bottom), (0, 0, 255), 2)
+    # cv2.rectangle(render, (left, top), (right, bottom), (0, 0, 255), 2)
 
     width = right - left
     height = bottom - top
@@ -401,7 +401,7 @@ def detect_finger(frame, render, face_coor):
 
         extreme_top, extreme_bottom, extreme_left, extreme_right = get_extreme_points(segmented)
 
-        cv2.circle(render, extreme_top, 8, (0, 0, 255), -1)
+        # cv2.circle(render, extreme_top, 8, (0, 0, 255), -1)
 
     return render, extreme_top, segmented
 
@@ -413,6 +413,7 @@ def exhibit_masks(frame, render, mask_status, mask_coors, mask_info):
     for mask_name, mask_state in mask_status.iteritems():
         if mask_state == 1:
             # this mask need to be exhibited
+            # print mask_name
             resize_and_add_img_to_render(render, mask_name, mask_info, mask_coors[mask_name])
 
 
@@ -648,6 +649,20 @@ def dirty_create(painted_mask):
     cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
 
 
+#-----------------------------------------------------------------------------
+# resize coor from 320x240 to 640x480
+def resize_coor(coor):
+    if len(coor) == 4:
+        new_coor = [0,0,0,0]
+        # top buttom
+        new_coor[0], new_coor[1] = int(coor[0] / 240.0 * 480), int(coor[1] / 240.0 * 480)
+        # left right
+        new_coor[2], new_coor[3] = int(coor[2] / 320.0 * 640), int(coor[3] / 320.0 * 640)
+        return new_coor
+    elif len(coor) == 2:
+        # x y
+        return (int(coor[0] / 320.0 * 640), int(coor[1] / 240.0 * 480))
+
 if __name__ == "__main__":
 
     #-----------------------------------------------------------------------------
@@ -659,9 +674,10 @@ if __name__ == "__main__":
     video_capture.set(3,640)
     video_capture.set(4,480)
 
+    
 
     # get frame weight and frame height
-    w, h = video_capture.get(3), video_capture.get(4)
+    w, h = video_capture.get(3),video_capture.get(4)
 
     # roi to self-draw the mask
     paper_coor = [0, int(0.5 * h), 0, int(0.5 * w)]
@@ -694,7 +710,7 @@ if __name__ == "__main__":
     mask_info = {"res/self_mask.png": [[], [], [], [], []],  "res/cat_ears2.png": [[], [], [], [], []], "res/funny_glasses.png" :[[], [], [], [], []]}
 
     # initialize the coordinate of masks
-    initialize_mask_dict(mask_coors, video_capture.get(4), video_capture.get(3))
+    initialize_mask_dict(mask_coors, h,w)
 
     # initialize the information of masks
     initialize_mask_info(mask_info)
@@ -710,7 +726,7 @@ if __name__ == "__main__":
     finger_print_list = [[]]
 
     # roi to self-draw the mask
-    paper_coor = [0, int(0.5 * h), 0, int(0.5 * w)]
+    paper_coor = [0, int(0.625 * h), 0, int(0.425 * w)]
 
     # roi to save the mask
     painted_mask = np.zeros((paper_coor[1] - paper_coor[0], paper_coor[3] - paper_coor[2], 3), np.uint8)
@@ -724,6 +740,8 @@ if __name__ == "__main__":
     # region of return-draw button
     return_button = [int(0.87 * h), int(h), int(0.26 * w), int(0.36 * w)]
 
+    # show 640x480
+    show = np.zeros((640,480), np.uint8)
 
 
     while True:
@@ -736,6 +754,10 @@ if __name__ == "__main__":
 
         # Capture video feed
         ret, frame = video_capture.read()
+        render_640x480 = frame.copy()
+        frame_640x480 = frame.copy()
+
+        frame = cv2.resize(frame, (320, 240), interpolation= cv2.INTER_AREA)
         # we use frame to detect and segment
         # and use render to render image and imshow
         render = frame.copy()
@@ -760,14 +782,19 @@ if __name__ == "__main__":
         (render, extreme_top, segmented) = detect_finger(frame, render, face_coor)
 
         # -----------------------------------------------------------------------------
+        # post phase 3: resize the extreme_top and face_coor from 320x240 to 640x480
+        # -----------------------------------------------------------------------------
+        new_face_coor = resize_coor(face_coor)
+        new_extreme_top = resize_coor(extreme_top)
+        # -----------------------------------------------------------------------------
         # phase 4: finger point to botton, and change the work statues accordingly
         # -----------------------------------------------------------------------------
         # if click on clear button, set all mask status to 1
-        if is_click(frame,render,extreme_top,clear_button):
+        if is_click(frame_640x480,render_640x480,new_extreme_top,clear_button):
             set_mask_status(mask_status, 1)
 
         # if click on draw mask button
-        if is_click(frame,render,extreme_top,start_draw_button):
+        if is_click(frame_640x480,render_640x480,new_extreme_top,start_draw_button):
             # let's start drawing mask!
             # change the work state to 2
             work_state = 2
@@ -781,27 +808,13 @@ if __name__ == "__main__":
                 pass
 
 
-            # if click on return button
-            # return from drawing to drag-display
-            if is_click(frame, render, extreme_top, return_button):
-                set_mask_status(mask_status, 1)
-                work_state = 1
-                p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
-                # and save the mask
-                save_painted_mask = create_alpha_mask(painted_mask)
-                cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
-                # reload the masks
-                reload_mask_dict(mask_coors, frame.shape[0], frame.shape[1])
-                reload_mask_info(mask_info)
-
-
 
         if work_state == 1:
             # -----------------------------------------------------------------------------
             # phase 5: drag masks
             # -----------------------------------------------------------------------------
 
-            render, state_4_count = drag(frame,render,extreme_top,face_coor,mask_status,mask_coors,mask_info, state_4_count)
+            render, state_4_count = drag(frame_640x480,render_640x480,new_extreme_top,new_face_coor,mask_status,mask_coors,mask_info, state_4_count)
 
 
         elif work_state == 2:
@@ -810,21 +823,46 @@ if __name__ == "__main__":
             # phase 7: draw the self-mask
             # -----------------------------------------------------------------------------
             set_mask_status(mask_status, 5)
-            draw_mask(frame, render, segmented, extreme_top, finger_print_list, paper_coor, painted_mask)
+            draw_mask(frame_640x480, render_640x480, segmented, new_extreme_top, finger_print_list, paper_coor, painted_mask)
+            # if click on return button
+            # return from drawing to drag-display
+            if is_click(frame_640x480, render_640x480, new_extreme_top, return_button):
+                set_mask_status(mask_status, 1)
+                work_state = 1
+                p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
+                # and save the mask
+                save_painted_mask = create_alpha_mask(painted_mask)
+                cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+                # reload the masks
+                reload_mask_dict(mask_coors, frame_640x480.shape[0], frame_640x480.shape[1])
+                reload_mask_info(mask_info)
 
+
+        # # -----------------------------------------------------------------------------
+        # # pre phase 6: resize frame before display maskss
+        # # -----------------------------------------------------------------------------
+        # render = cv2.resize(render, (render_640x480.shape[1], render_640x480.shape[0]), interpolation= cv2.INTER_AREA)
+        # show = cv2.absdiff(render, render_640x480)
+        # render_640x480 = cv2.add(show, render_640x480)
         # -----------------------------------------------------------------------------
-        # phase 6: display mask according to mask state
+        # phase 6: display mask according to mask state, rander on 640x480 frame
         # -----------------------------------------------------------------------------
 
-        display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, mask_coors, mask_info)
+        cv2.circle(render_640x480, new_extreme_top, 10, (255,0,0), -1)
+        cv2.rectangle(render_640x480, (new_face_coor[2], new_face_coor[0]), (new_face_coor[3], new_face_coor[1]), (0, 0, 255), 2)
 
-        # imshow the frame
-        cv2.imshow('Video', render)
+        display_mask(frame_640x480, render_640x480, new_extreme_top, new_face_coor, nose_coor, mask_status, mask_coors, mask_info)
+
+
+        # show the frame
+        cv2.imshow('Video',render_640x480)
+
 
         # press any key to exit
         # NOTE;  x86 systems may need to remove: " 0xFF == ord('q')"
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
 
             # When everything is done, release the capture
     video_capture.release()

@@ -22,13 +22,14 @@ def segment_hybird(frame):
     mask1 = np.array([])
     mask1 = cv2.bitwise_or(mask_hsv1, mask_hsv2, mask1)
 
-
-
+    mask1 = cv2.dilate(mask1, disk(4), iterations=1)
 
     mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
+    mask2 = cv2.erode(mask2, disk(4), iterations=1)
 
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
+    # mask = cv2.bitwise_and(mask, mask3, mask)
     # cv2.imshow("show", mask)
 
 
@@ -42,13 +43,13 @@ def segment_hybird(frame):
 
     # eros = erosion(mask, disk(1))
     # dila = dilation(eros, disk(4))
-
+    cv2.imshow("show", mask)
 
     # mask = sfr.median(dilation, disk(3))
 
     # mask = cv2.erode(mask, disk(1), iterations=1)
 
-    cv2.imshow("show", dilation)
+    # cv2.imshow("show", dilation)
 
 
 
@@ -83,83 +84,6 @@ def get_extreme_points(thresholded, segmented):
     return extreme_top, extreme_bottom, extreme_left, extreme_right
 
 
-def segment_hsv(frame):
-    # Convert to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # Create a binary image with where white will be skin colors and rest is black
-    mask2 = cv2.inRange(hsv, np.array([-25, 50, 40]), np.array([25, 153, 255]))
-
-    cv2.imshow("show", mask2)
-
-    # Kernel matrices for morphological transformation
-    kernel_square = np.ones((11, 11), np.uint8)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-
-    # Perform morphological transformations to filter out the background noise
-    # Dilation increase skin color area
-    # Erosion increase skin color area
-    dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
-    erosion = cv2.erode(dilation, kernel_square, iterations=1)
-    dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
-    filtered = cv2.medianBlur(dilation2, 5)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
-    dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    # ??????
-    median = cv2.medianBlur(dilation2, 5)
-
-    thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
-
-
-    # Find contours of the filtered frame
-    _, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-    if len(contours) == 0:
-        return
-    else:
-        segmented = max(contours, key=cv2.contourArea)
-    return (thresh, segmented)
-
-
-
-def segment_ycrcb(frame):
-    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCrCb)
-
-    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
-
-    # Kernel matrices for morphological transformation
-    kernel_square = np.ones((11, 11), np.uint8)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-
-    # Perform morphological transformations to filter out the background noise
-    # Dilation increase skin color area
-    # Erosion increase skin color area
-    dilation = cv2.dilate(mask2, kernel_ellipse, iterations=1)
-    erosion = cv2.erode(dilation, kernel_square, iterations=1)
-    dilation2 = cv2.dilate(erosion, kernel_ellipse, iterations=1)
-    filtered = cv2.medianBlur(dilation2, 5)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (8, 8))
-    dilation2 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    kernel_ellipse = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-    dilation3 = cv2.dilate(filtered, kernel_ellipse, iterations=1)
-    # ??????
-    median = cv2.medianBlur(dilation2, 5)
-
-    thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-    # thresh = cv2.threshold(median, 127, 255, cv2.THRESH_BINARY)[1]
-
-
-    # Find contours of the filtered frame
-    _, contours, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-    if len(contours) == 0:
-        return
-    else:
-        segmented = max(contours, key=cv2.contourArea)
-    return (thresh, segmented)
 
 
 # main function
