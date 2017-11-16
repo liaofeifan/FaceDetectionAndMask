@@ -24,11 +24,12 @@ def segment_hybird(frame):
 
     mask1 = cv2.dilate(mask1, disk(4), iterations=1)
 
-    mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
-    mask2 = cv2.erode(mask2, disk(4), iterations=1)
+    # mask2 = cv2.inRange(ycrcb, np.array([0, 133, 77]), np.array([255, 173, 127]))
+    # mask2 = cv2.erode(mask2, disk(4), iterations=1)
 
     mask = np.array([])
-    mask = cv2.bitwise_and(mask1, mask2, mask)
+    mask = mask1
+    # mask = cv2.bitwise_and(mask1, mask2, mask)
     # mask = cv2.bitwise_and(mask, mask3, mask)
     # cv2.imshow("show", mask)
 
@@ -41,15 +42,15 @@ def segment_hybird(frame):
     dilation = cv2.dilate(erosion, disk(4), iterations=1)
     mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(13))
 
+
     # eros = erosion(mask, disk(1))
     # dila = dilation(eros, disk(4))
-    cv2.imshow("show", mask)
 
-    # mask = sfr.median(dilation, disk(3))
+    mask = sfr.median(mask, disk(3))
 
     # mask = cv2.erode(mask, disk(1), iterations=1)
 
-    # cv2.imshow("show", dilation)
+    cv2.imshow("show", mask)
 
 
 

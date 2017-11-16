@@ -6,7 +6,7 @@ import skimage.filters.rank as sfr
 import os
 
 
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # load Classifiers
 # return (faceCascade, noseCascade)
 def load_Classifiers():
@@ -25,7 +25,7 @@ def load_Classifiers():
     return (faceCascade, noseCascade, fistCascade, eyeCascade)
 
 
-#--------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # load (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth)
 def load_masks(name):
     imgDecoration = cv2.imread(name, -1)
@@ -50,12 +50,13 @@ def load_masks(name):
 def initialize_mask_info(mask_load_info):
     for mask_name, mask_info in mask_load_info.iteritems():
         (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks(mask_name)
-        mask_info[0], mask_info[1], mask_info[2] , mask_info[3], mask_info[4] = imgDecoration, \
-                                                                                orig_mask, \
-                                                                                orig_mask_inv, \
-                                                                                origDecorationHeight, \
-                                                                                origDecorationWidth
+        mask_info[0], mask_info[1], mask_info[2], mask_info[3], mask_info[4] = imgDecoration, \
+                                                                               orig_mask, \
+                                                                               orig_mask_inv, \
+                                                                               origDecorationHeight, \
+                                                                               origDecorationWidth
     return mask_load_info
+
 
 # --------------------------------------------------------------------------
 # reload (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) in to
@@ -63,12 +64,13 @@ def initialize_mask_info(mask_load_info):
 def reload_mask_info(mask_load_info):
     for mask_name, mask_info in mask_load_info.iteritems():
         (imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth) = load_masks(mask_name)
-        mask_info[0], mask_info[1], mask_info[2] , mask_info[3], mask_info[4] = imgDecoration, \
-                                                                                orig_mask, \
-                                                                                orig_mask_inv, \
-                                                                                origDecorationHeight, \
-                                                                                origDecorationWidth
+        mask_info[0], mask_info[1], mask_info[2], mask_info[3], mask_info[4] = imgDecoration, \
+                                                                               orig_mask, \
+                                                                               orig_mask_inv, \
+                                                                               origDecorationHeight, \
+                                                                               origDecorationWidth
     return mask_load_info
+
 
 # --------------------------------------------------------------------------
 # initialize the coordinate of masks
@@ -87,6 +89,7 @@ def initialize_mask_dict(mask_coordinate, frame_height, frame_width):
         mask_status[3] = right
 
         count += 1
+
 
 # --------------------------------------------------------------------------
 # initialize the coordinate of masks
@@ -107,7 +110,8 @@ def reload_mask_dict(mask_coordinate, frame_height, frame_width):
 
         count += 1
 
-#--------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
 # get fingers extreme points
 def get_extreme_points(segmented):
     chull = cv2.convexHull(segmented)
@@ -120,29 +124,48 @@ def get_extreme_points(segmented):
 
     return extreme_top, extreme_bottom, extreme_left, extreme_right
 
-#--------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
 # get mask name by mask_state
 def get_mask_name(mask_status, mask_state):
     if mask_status is not None:
         return mask_status.keys()[mask_status.values().index(mask_state)]
     return " "
 
-#--------------------------------------------------------------------------
+
+# --------------------------------------------------------------------------
 # calculate the distance between (x1, y1) and (x2, y2)
 def cal_dis(x1, y1, x2, y2):
-    return np.sqrt( np.power(x1 - x2, 2) + np.power(y1 - y2, 2) )
+    return np.sqrt(np.power(x1 - x2, 2) + np.power(y1 - y2, 2))
 
 
 # --------------------------------------------------------------------------
 # use hsv to segment the mask and get the finger contour
 # i prefer to use HSV when in the classroom
 # return (thresh, segmented) or none if not detected
-def segment_hybird(frame):
+def segment_hybird(frame,extreme):
+    extreme_roi_top, extreme_roi_bottom, extreme_roi_left, extreme_roi_right = 0,0,0,0
+    if len(extreme) == 0:
+        roi = frame
+    else:
+        extreme_roi_top = extreme[1] - 20
+        extreme_roi_bottom = extreme[1] +
+        extreme_roi_left = extreme[0] - 20
+        extreme_roi_right = extreme[0] + 20
+        if extreme_roi_top < 0:
+            extreme_roi_top = 0
+        if extreme_roi_bottom > frame.shape[1]:
+            extreme_roi_bottom = frame.shape[1]
+        if extreme_roi_left < 0:
+            extreme_roi_left = 0
+        if extreme_roi_right > frame.shape[0]:
+            extreme_roi_right = frame.shape[0]
+        roi = frame[extreme_roi_top:extreme_roi_bottom, extreme_roi_left:extreme_roi_right]
     # Convert to HSV color space
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    hsv = cv2.cvtColor(roi, cv2.COLOR_BGR2HSV)
 
     # Convert to ycrcb color space
-    ycrcb = cv2.cvtColor(frame, cv2.COLOR_BGR2YCR_CB)
+    ycrcb = cv2.cvtColor(roi, cv2.COLOR_BGR2YCR_CB)
 
     mask_hsv1 = cv2.inRange(hsv, np.array([0, 51, 102]), np.array([25 / 2, 153, 255]))
     mask_hsv2 = cv2.inRange(hsv, np.array([335 / 2, 51, 102]), np.array([360 / 2, 153, 255]))
@@ -154,36 +177,49 @@ def segment_hybird(frame):
     mask = np.array([])
     mask = cv2.bitwise_and(mask1, mask2, mask)
 
-
     erosion = cv2.erode(mask, disk(1), iterations=1)
     dilation = cv2.dilate(erosion, disk(4), iterations=1)
     mask = cv2.morphologyEx(dilation, cv2.MORPH_CLOSE, disk(15))
 
     mask = sfr.median(mask, disk(5))
 
+    # add roi back to frame
+    black_frame = np.zeros((frame.shape[0], frame.shape[1]), np.uint8)
+    if len(extreme) != 0:
+        black_frame[extreme_roi_top:extreme_roi_bottom, extreme_roi_left:extreme_roi_right] = mask
+        # Find contours of the filtered frame
+        _, contours, hierarchy = cv2.findContours(black_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-    # Find contours of the filtered frame
-    _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-
-    if len(contours) == 0:
-        return
+        if len(contours) == 0:
+            return
+        else:
+            segmented = max(contours, key=cv2.contourArea)
+        return (black_frame, segmented)
     else:
-        segmented = max(contours, key=cv2.contourArea)
-    return (mask, segmented)
+        # Find contours of the filtered frame
+        _, contours, hierarchy = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 
-#-----------------------------------------------------------------------------
+        if len(contours) == 0:
+            return
+        else:
+            segmented = max(contours, key=cv2.contourArea)
+        return (mask, segmented)
+
+
+
+
+# -----------------------------------------------------------------------------
 # resize the mask to DecorationWidth and DecorationHeight
 # return (resized_img, resized_mask, resized_mask_inv)
-def resize_mask(img, orig_mask, orig_mask_inv,  DecorationWidth,DecorationHeight):
-    resized_img = cv2.resize(img,  (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
+def resize_mask(img, orig_mask, orig_mask_inv, DecorationWidth, DecorationHeight):
+    resized_img = cv2.resize(img, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
     resized_mask = cv2.resize(orig_mask, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
     resized_mask_inv = cv2.resize(orig_mask_inv, (DecorationWidth, DecorationHeight), interpolation=cv2.INTER_AREA)
 
     return (resized_img, resized_mask, resized_mask_inv)
 
 
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # display the mask on render according to the coordinate
 # return render
 def add_img_to_render(render, img, mask, mask_inv, coor):
@@ -222,8 +258,7 @@ def add_img_to_render(render, img, mask, mask_inv, coor):
     return render
 
 
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # resize the mask according to the coordinate,
 # display the mask on render according to the coordinate
 # resize according to the frame size
@@ -244,7 +279,6 @@ def resize_and_add_img_to_render(render, mask_name, mask_info, coor):
     DecorationWidth = right - left
     DecorationHeight = bottom - top
 
-
     if DecorationWidth == 0 and DecorationHeight == 0:
         return render
 
@@ -260,13 +294,13 @@ def resize_and_add_img_to_render(render, mask_name, mask_info, coor):
 
     return render
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # detect face (one face)
 # return face_coor and nose_coor
 # face_coor = [face_top, face_bottom, face_Left, face_right]
 # nose_coor = [nose_top, nose_bottom, nose_left, nose_right]
 def detect_face_and_nose(frame, render, faceCascade, noseCascade):
-
     # Create greyscale image from the video feed
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     # Detect faces in input video stream
@@ -279,8 +313,7 @@ def detect_face_and_nose(frame, render, faceCascade, noseCascade):
     )
 
     if len(faces) == 0:
-        return ([0,0,0,0], [0,0,0,0])
-
+        return ([0, 0, 0, 0], [0, 0, 0, 0])
 
     (x, y, w, h) = faces[0]
 
@@ -302,41 +335,19 @@ def detect_face_and_nose(frame, render, faceCascade, noseCascade):
 
     roi_gray = gray[y1:y2, x1:x2]
 
-
     # draw face rect
     # cv2.rectangle(render, (face_left, face_top), (face_right, face_bottom), (0, 0, 255), 2)
 
     nose_coor = [0, 0, 0, 0]
 
-    # detect nose
-    # for not I don't need to use it
-    # nose = noseCascade.detectMultiScale(roi_gray)
-    # if len(nose) == 0:
-    #     return (face_coor, [0,0,0,0])
-    #
-    # (nx, ny, nw, nh) = nose[0]
-    #
-    # nose_top = ny
-    # nose_bottom = ny + nh
-    # nose_left = nx
-    # nose_right = nx + nw
-    #
-    #
-    # nose_coor = [nose_top, nose_bottom, nose_left, nose_right]
-
     return face_coor, nose_coor
 
 
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # finger detection and get extreme_top
 # return render and extreme_top (but only extreme_top should be used)
-def detect_finger(frame, render, face_coor):
+def detect_finger(frame, render, face_coor, extreme):
     top, bottom, left, right = face_coor[0], face_coor[1], face_coor[2], face_coor[3]
-    # flip the frame so that it is not the mirror view ????????????
-    # frame = cv2.flip(frame, 1)
-
-
     # get the height and width of the frame
     (frame_height, frame_width) = frame.shape[:2]
 
@@ -362,14 +373,12 @@ def detect_finger(frame, render, face_coor):
     if (left - 2) < 0:
         left = 0 + 3
 
-
     # cv2.rectangle(render, (left, top), (right, bottom), (0, 0, 255), 2)
 
     width = right - left
     height = bottom - top
 
     if width is not 0 and height is not 0:
-
         frame_roi = frame[top:bottom, left:right]
         black_box = np.zeros(frame_roi.shape, np.uint8)
         # white_mask = np.zeros((height + 2, width + 2), np.uint8)
@@ -382,19 +391,18 @@ def detect_finger(frame, render, face_coor):
 
     # to get the background, keep looking till a threshold is read
     # so that our running average models gets calibrated
-
     # segment the hand region
-    hand = segment_hybird(frame)
+    hand = segment_hybird(frame, extreme)
 
-    extreme_top = [0,0]
+    extreme_top = [0, 0]
 
     segmented = []
 
     # check whether hand region is segmented
     if hand is not None:
         # if yes, up[ack the threshold image and segmented region
-        (thresholded, segmented) = hand
-
+        (masked, segmented) = hand
+        cv2.imshow("test", masked)
         # draw the semgent retion nd display the frame****
         cv2.drawContours(render, segmented, -1, (0, 255, 255), 2)
         # cv2.imshow("Thresholded", thresholded)
@@ -406,7 +414,7 @@ def detect_finger(frame, render, face_coor):
     return render, extreme_top, segmented
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # exhibit tha masks
 def exhibit_masks(frame, render, mask_status, mask_coors, mask_info):
     # exhibit masks which state == 1
@@ -417,35 +425,38 @@ def exhibit_masks(frame, render, mask_status, mask_coors, mask_info):
             resize_and_add_img_to_render(render, mask_name, mask_info, mask_coors[mask_name])
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # test if click on "return" bottom
 # return true or false
 def is_click(frame, render, extreme_top, region):
     click_coor = region
 
-    cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (0, 255, 255), 2)
+    cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (0, 255, 255), -1)
+    cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (200, 255, 255), 2)
 
     if extreme_top is not None:
-        if (extreme_top[0] <= click_coor[3] and extreme_top[0] >= click_coor[2]) and (extreme_top[1] >= click_coor[0] and extreme_top[1] <= click_coor[1]):
+        if (extreme_top[0] <= click_coor[3] and extreme_top[0] >= click_coor[2]) and (
+                extreme_top[1] >= click_coor[0] and extreme_top[1] <= click_coor[1]):
+            cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (255, 200, 255), -1)
+            cv2.rectangle(render, (click_coor[2], click_coor[0]), (click_coor[3], click_coor[1]), (200, 255, 255), 2)
             return True
 
     return False
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # set all the mask_states
 def set_mask_status(mask_status, state):
     for mask_name in mask_status.keys():
         mask_status[mask_name] = state
 
 
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # drag the mask
 # return render
 def drag(frame, render, extreme_top, face_coor, mask_status, mask_coors, mask_info, state_4_count):
     CONST_STATE_4_SHADOW = 15
-    print "state_4_count", state_4_count
+    # print "state_4_count", state_4_count
 
     # if a mask is been draged from face to exhibition
     if 4 in mask_status.values():
@@ -464,7 +475,7 @@ def drag(frame, render, extreme_top, face_coor, mask_status, mask_coors, mask_in
         # get the dragging mask name
         dragged_mask_name = get_mask_name(mask_status, 2)
         # calculate the distance between finger and face
-        face_cen = [ (face_coor[2] + face_coor[3]) / 2, (face_coor[0] + face_coor[1]) / 2 ]
+        face_cen = [(face_coor[2] + face_coor[3]) / 2, (face_coor[0] + face_coor[1]) / 2]
         r = cal_dis(face_cen[0], face_cen[1], face_coor[2], face_coor[0])
         finger_to_face = cal_dis(extreme_top[0], extreme_top[1], face_cen[0], face_cen[1])
         if abs(r - finger_to_face) < 10:
@@ -503,7 +514,8 @@ def drag(frame, render, extreme_top, face_coor, mask_status, mask_coors, mask_in
         # find finger near which face
         for mask_name, mask_state in mask_status.iteritems():
             if mask_state == 1:
-                mask_cen =[ (mask_coors[mask_name][2] + mask_coors[mask_name][3]) / 2, (mask_coors[mask_name][0] + mask_coors[mask_name][1]) / 2]
+                mask_cen = [(mask_coors[mask_name][2] + mask_coors[mask_name][3]) / 2,
+                            (mask_coors[mask_name][0] + mask_coors[mask_name][1]) / 2]
                 finger_to_mask = cal_dis(extreme_top[0], extreme_top[1], mask_cen[0], mask_cen[1])
 
                 if finger_to_mask < 10:
@@ -514,7 +526,7 @@ def drag(frame, render, extreme_top, face_coor, mask_status, mask_coors, mask_in
     return render, state_4_count
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # display mask according to mask state
 def display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, mask_coors, mask_info):
     if 5 in mask_status.values():
@@ -537,11 +549,8 @@ def display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, 
         mask_height, mask_width = mask_coors[drag_mask_name][1] - mask_coors[drag_mask_name][0], \
                                   mask_coors[drag_mask_name][3] - mask_coors[drag_mask_name][2]
 
-
-        drag_coor = [ extreme_top[1] - mask_height / 2, extreme_top[1] + mask_height / 2,
-                      extreme_top[0] - mask_width / 2, extreme_top[0] + mask_width / 2 ]
-
-
+        drag_coor = [extreme_top[1] - mask_height / 2, extreme_top[1] + mask_height / 2,
+                     extreme_top[0] - mask_width / 2, extreme_top[0] + mask_width / 2]
 
         resize_and_add_img_to_render(render, drag_mask_name, mask_info, drag_coor)
 
@@ -551,20 +560,17 @@ def display_mask(frame, render, extreme_top, face_coor, nose_coor, mask_status, 
         mask_height, mask_width = mask_coors[drag_mask_name][1] - mask_coors[drag_mask_name][0], \
                                   mask_coors[drag_mask_name][3] - mask_coors[drag_mask_name][2]
 
-
-        drag_coor = [ extreme_top[1] - mask_height / 2, extreme_top[1] + mask_height / 2,
-                      extreme_top[0] - mask_width / 2, extreme_top[0] + mask_width / 2 ]
+        drag_coor = [extreme_top[1] - mask_height / 2, extreme_top[1] + mask_height / 2,
+                     extreme_top[0] - mask_width / 2, extreme_top[0] + mask_width / 2]
 
         resize_and_add_img_to_render(render, drag_mask_name, mask_info, drag_coor)
 
     return render
 
 
-
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # draw the self-mask
 def draw_mask(frame, render, segmented, extreme_top, finger_print_list, paper_coor, painted_mask):
-
     if len(segmented) != 0:
 
         # is one finger
@@ -582,29 +588,28 @@ def draw_mask(frame, render, segmented, extreme_top, finger_print_list, paper_co
     return render, painted_mask
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # helper function for draw_mask
 # use to runder mask on render frame and paper
 def painting(frame, render, pts_list, paper_coor, roi_white_paper):
-    cv2.rectangle(render,(paper_coor[2], paper_coor[0]), (paper_coor[1], paper_coor[3]), (0,0,155), 1)
+    cv2.rectangle(render, (paper_coor[2], paper_coor[0]), (paper_coor[1], paper_coor[3]), (0, 0, 155), 1)
     roi_paper = render[paper_coor[0]:paper_coor[3], paper_coor[2]:paper_coor[1]]
     if len(pts_list) != 0:
         for pts in pts_list:
-            cv2.polylines(roi_paper, [np.array(pts)], False, (255,20, 147), 8)
+            cv2.polylines(roi_paper, [np.array(pts)], False, (255, 20, 147), 8)
             cv2.polylines(roi_white_paper, [np.array(pts)], False, (255, 20, 147), 8)
-
 
     return render, roi_white_paper
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # detect if the contour detected is fist
 def is_fist(frame, segmented):
     if len(segmented) == 0:
         return False
     extreme_top, extreme_bottom, extreme_left, extreme_right = get_extreme_points(segmented)
     cnt = segmented
-    whole_area =  cv2.contourArea(cnt)
+    whole_area = cv2.contourArea(cnt)
     hull = cv2.convexHull(cnt)
     moments = cv2.moments(cnt)
     if moments['m00'] != 0:
@@ -627,20 +632,21 @@ def is_fist(frame, segmented):
     return True
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # convert from RGB to RGBA to save
 def create_alpha_mask(painted_mask):
-    h,w = painted_mask.shape[:2]
-    to_save_mask = np.zeros((h,w,4), np.uint8)
+    h, w = painted_mask.shape[:2]
+    to_save_mask = np.zeros((h, w, 4), np.uint8)
     for i in range(h):
         for j in range(w):
-            to_save_mask[i,j,0], to_save_mask[i,j,1], to_save_mask[i,j,2] = \
-                painted_mask[i,j,0], painted_mask[i,j,1], painted_mask[i,j,2]
-            to_save_mask[i,j,3] = 200
+            to_save_mask[i, j, 0], to_save_mask[i, j, 1], to_save_mask[i, j, 2] = \
+                painted_mask[i, j, 0], painted_mask[i, j, 1], painted_mask[i, j, 2]
+            to_save_mask[i, j, 3] = 200
 
     return to_save_mask
 
-#-----------------------------------------------------------------------------
+
+# -----------------------------------------------------------------------------
 # dirte create
 def dirty_create(painted_mask):
     p_h, p_w = painted_mask.shape[0], painted_mask.shape[1]
@@ -649,11 +655,11 @@ def dirty_create(painted_mask):
     cv2.imwrite("res/self_mask.png", save_painted_mask, [cv2.IMWRITE_PNG_COMPRESSION, 9])
 
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # resize coor from 320x240 to 640x480
 def resize_coor(coor):
     if len(coor) == 4:
-        new_coor = [0,0,0,0]
+        new_coor = [0, 0, 0, 0]
         # top buttom
         new_coor[0], new_coor[1] = int(coor[0] / 240.0 * 480), int(coor[1] / 240.0 * 480)
         # left right
@@ -663,21 +669,20 @@ def resize_coor(coor):
         # x y
         return (int(coor[0] / 320.0 * 640), int(coor[1] / 240.0 * 480))
 
+
 if __name__ == "__main__":
 
-    #-----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
     # init
-    #-----------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------
     video_capture = cv2.VideoCapture(0)
 
     # set video resolution
-    video_capture.set(3,640)
-    video_capture.set(4,480)
-
-    
+    video_capture.set(3, 640)
+    video_capture.set(4, 480)
 
     # get frame weight and frame height
-    w, h = video_capture.get(3),video_capture.get(4)
+    w, h = video_capture.get(3), video_capture.get(4)
 
     # roi to self-draw the mask
     paper_coor = [0, int(0.5 * h), 0, int(0.5 * w)]
@@ -699,25 +704,24 @@ if __name__ == "__main__":
     # status 3 : add on face
     # status 4 : drag from face to exhibit
     # status 5 : clean the desktop when drawing
-    mask_status = {"res/self_mask.png" : 1,  "res/cat_ears2.png" : 1, "res/funny_glasses.png" : 1}
-
+    mask_status = {"res/self_mask.png": 1, "res/cat_ears2.png": 1, "res/funny_glasses.png": 1}
 
     # mask_coors = {"mask_name": [top, bottom, left, right]}
-    mask_coors = {"res/self_mask.png": [0, 0, 0, 0], "res/cat_ears2.png": [0, 0, 0, 0], "res/funny_glasses.png" : [0, 0, 0, 0]}
-
+    mask_coors = {"res/self_mask.png": [0, 0, 0, 0], "res/cat_ears2.png": [0, 0, 0, 0],
+                  "res/funny_glasses.png": [0, 0, 0, 0]}
 
     # mask_info = {"mask_name": [imgDecoration, orig_mask, orig_mask_inv, origDecorationHeight, origDecorationWidth]}
-    mask_info = {"res/self_mask.png": [[], [], [], [], []],  "res/cat_ears2.png": [[], [], [], [], []], "res/funny_glasses.png" :[[], [], [], [], []]}
+    mask_info = {"res/self_mask.png": [[], [], [], [], []], "res/cat_ears2.png": [[], [], [], [], []],
+                 "res/funny_glasses.png": [[], [], [], [], []]}
 
     # initialize the coordinate of masks
-    initialize_mask_dict(mask_coors, h,w)
+    initialize_mask_dict(mask_coors, h, w)
 
     # initialize the information of masks
     initialize_mask_info(mask_info)
 
     # load face, fist and nose Classifiers
     (faceCascade, noseCascade, fistCascade, eyeCascade) = load_Classifiers()
-
 
     # count how many frames drag be shadowed
     state_4_count = 0
@@ -732,17 +736,19 @@ if __name__ == "__main__":
     painted_mask = np.zeros((paper_coor[1] - paper_coor[0], paper_coor[3] - paper_coor[2], 3), np.uint8)
 
     # region of clear button
-    clear_button = [int(0.87 * h), int(h), 0, int(0.1 * w)]
+    clear_button = [int(0.9 * h), int(h), 0, int(0.1 * w)]
 
     # region of start-draw button
-    start_draw_button = [int(0.87 * h), int(h), int(0.13 * w), int(0.23 * w)]
+    start_draw_button = [int(0.9 * h), int(h), int(0.13 * w), int(0.23 * w)]
 
     # region of return-draw button
-    return_button = [int(0.87 * h), int(h), int(0.26 * w), int(0.36 * w)]
+    return_button = [int(0.9 * h), int(h), int(0.26 * w), int(0.36 * w)]
 
     # show 640x480
-    show = np.zeros((640,480), np.uint8)
+    show = np.zeros((640, 480), np.uint8)
 
+    # init extreme_top
+    extreme_top = []
 
     while True:
 
@@ -757,7 +763,7 @@ if __name__ == "__main__":
         render_640x480 = frame.copy()
         frame_640x480 = frame.copy()
 
-        frame = cv2.resize(frame, (320, 240), interpolation= cv2.INTER_AREA)
+        frame = cv2.resize(frame, (320, 240), interpolation=cv2.INTER_AREA)
         # we use frame to detect and segment
         # and use render to render image and imshow
         render = frame.copy()
@@ -774,27 +780,27 @@ if __name__ == "__main__":
 
         (face_coor, nose_coor) = detect_face_and_nose(frame, render, faceCascade, noseCascade)
 
-
         # -----------------------------------------------------------------------------
         # phase 3: detect fingers
         # -----------------------------------------------------------------------------
 
-        (render, extreme_top, segmented) = detect_finger(frame, render, face_coor)
+        (render, extreme_top, segmented) = detect_finger(frame, render, face_coor, extreme_top)
 
         # -----------------------------------------------------------------------------
         # post phase 3: resize the extreme_top and face_coor from 320x240 to 640x480
         # -----------------------------------------------------------------------------
         new_face_coor = resize_coor(face_coor)
         new_extreme_top = resize_coor(extreme_top)
+        # new_fist_coor = resize_coor(fist_coor)
         # -----------------------------------------------------------------------------
         # phase 4: finger point to botton, and change the work statues accordingly
         # -----------------------------------------------------------------------------
         # if click on clear button, set all mask status to 1
-        if is_click(frame_640x480,render_640x480,new_extreme_top,clear_button):
+        if is_click(frame_640x480, render_640x480, new_extreme_top, clear_button):
             set_mask_status(mask_status, 1)
 
         # if click on draw mask button
-        if is_click(frame_640x480,render_640x480,new_extreme_top,start_draw_button):
+        if is_click(frame_640x480, render_640x480, new_extreme_top, start_draw_button):
             # let's start drawing mask!
             # change the work state to 2
             work_state = 2
@@ -807,14 +813,13 @@ if __name__ == "__main__":
             except OSError:
                 pass
 
-
-
         if work_state == 1:
             # -----------------------------------------------------------------------------
             # phase 5: drag masks
             # -----------------------------------------------------------------------------
 
-            render, state_4_count = drag(frame_640x480,render_640x480,new_extreme_top,new_face_coor,mask_status,mask_coors,mask_info, state_4_count)
+            render, state_4_count = drag(frame_640x480, render_640x480, new_extreme_top, new_face_coor, mask_status,
+                                         mask_coors, mask_info, state_4_count)
 
 
         elif work_state == 2:
@@ -823,7 +828,8 @@ if __name__ == "__main__":
             # phase 7: draw the self-mask
             # -----------------------------------------------------------------------------
             set_mask_status(mask_status, 5)
-            draw_mask(frame_640x480, render_640x480, segmented, new_extreme_top, finger_print_list, paper_coor, painted_mask)
+            draw_mask(frame_640x480, render_640x480, segmented, new_extreme_top, finger_print_list, paper_coor,
+                      painted_mask)
             # if click on return button
             # return from drawing to drag-display
             if is_click(frame_640x480, render_640x480, new_extreme_top, return_button):
@@ -837,7 +843,6 @@ if __name__ == "__main__":
                 reload_mask_dict(mask_coors, frame_640x480.shape[0], frame_640x480.shape[1])
                 reload_mask_info(mask_info)
 
-
         # # -----------------------------------------------------------------------------
         # # pre phase 6: resize frame before display maskss
         # # -----------------------------------------------------------------------------
@@ -848,15 +853,17 @@ if __name__ == "__main__":
         # phase 6: display mask according to mask state, rander on 640x480 frame
         # -----------------------------------------------------------------------------
 
-        cv2.circle(render_640x480, new_extreme_top, 10, (255,0,0), -1)
-        cv2.rectangle(render_640x480, (new_face_coor[2], new_face_coor[0]), (new_face_coor[3], new_face_coor[1]), (0, 0, 255), 2)
+        cv2.circle(render_640x480, new_extreme_top, 10, (255, 0, 0), -1)
+        cv2.rectangle(render_640x480, (new_face_coor[2], new_face_coor[0]), (new_face_coor[3], new_face_coor[1]),
+                      (0, 0, 255), 2)
+        # cv2.rectangle(render_640x480, (new_fist_coor[2], new_fist_coor[0]), (new_fist_coor[3], new_fist_coor[1]),
+        #               (255, 0, 255), 2)
 
-        display_mask(frame_640x480, render_640x480, new_extreme_top, new_face_coor, nose_coor, mask_status, mask_coors, mask_info)
-
+        display_mask(frame_640x480, render_640x480, new_extreme_top, new_face_coor, nose_coor, mask_status, mask_coors,
+                     mask_info)
 
         # show the frame
-        cv2.imshow('Video',render_640x480)
-
+        # cv2.imshow('Video', render_640x480)
 
         # press any key to exit
         # NOTE;  x86 systems may need to remove: " 0xFF == ord('q')"
