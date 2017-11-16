@@ -21,5 +21,7 @@ scikit-learn 0.19.1
 
 ## usage
 Preprepared masks are displayed at top left region. You can drag the mask from exhibition region to you mask. If you want to change the mask, just drag another one to your face.
+
 "Click" on the second yellow button, than you can enter into "Paper", draw the mask on the top left region with red bound. When you finish, click on the third yellow button, than this self-mask will be displayed at the third mask. 
+
 Just drag it to you face!
